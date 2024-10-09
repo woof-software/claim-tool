@@ -3,7 +3,7 @@
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { optimism, optimismSepolia } from 'wagmi/chains';
 
