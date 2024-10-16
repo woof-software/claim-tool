@@ -1,14 +1,7 @@
-import ClaimButton from '@/components/ClaimButton';
-import ConnectButton from '@/components/ConnectButton';
-import React from 'react';
+import { redirect } from 'next/navigation';
 
 const Home = () => {
-  return (
-    <div>
-      <ConnectButton />
-      <ClaimButton />
-    </div>
-  );
+  redirect('/grants');
 };
 
 export default Home;
