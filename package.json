@@ -9,7 +9,7 @@
     "prepare": "husky",
     "lint": "biome lint .",
     "format": "biome format .",
-    "check": "biome check ."
+    "check": "biome check --formatter=compact --error-on=lint,parse,format ."
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
