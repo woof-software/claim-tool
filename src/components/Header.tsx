@@ -3,7 +3,7 @@
 import ConnectButton from '@/components/ConnectButton';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Logo from './common/Logo';
+import Logo from './common/images/Logo';
 import { Button } from './ui/button';
 
 const links = [

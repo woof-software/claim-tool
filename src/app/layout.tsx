@@ -1,6 +1,6 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import BackgroundImage from '@/components/common/BgImage';
+import BackgroundImage from '@/components/common/images/BgImage';
 import ContextProvider from '@/context';
 import type { Metadata } from 'next';
 import { inter, sora } from './fonts';

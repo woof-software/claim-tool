@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { optimism, optimismSepolia } from 'wagmi/chains';
+import { DelegatesProvider } from './DelegatesContext';
+import { GrantsProvider } from './GrantsContext';
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
 
@@ -26,7 +28,11 @@ function ContextProvider({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider>
+          <GrantsProvider>
+            <DelegatesProvider>{children}</DelegatesProvider>
+          </GrantsProvider>
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
