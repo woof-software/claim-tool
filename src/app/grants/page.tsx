@@ -1,8 +1,16 @@
 import ClaimButton from '@/components/ClaimButton';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Hexagon, Search } from 'lucide-react';
+import { ArrowUpDown, ArrowUpRight, Hexagon, Search } from 'lucide-react';
+import Link from 'next/link';
 
 const grants = [
   {
@@ -12,7 +20,8 @@ const grants = [
     date: new Date('2024-10-01'),
     delegateTo: '0x01',
     latestClaim: '0x00',
-    claimed: '138571.80 / 250000.00',
+    claimed: 138571.8,
+    grantAmount: 250000.0,
   },
   {
     title: 'Optimism Collective',
@@ -21,7 +30,8 @@ const grants = [
     date: new Date('2024-09-15'),
     delegateTo: '0x02',
     latestClaim: '0x01',
-    claimed: '75000.00 / 100000.00',
+    claimed: 75000.0,
+    grantAmount: 100000.0,
   },
   {
     title: 'Velodrome Finance',
@@ -30,7 +40,8 @@ const grants = [
     date: new Date('2024-11-30'),
     delegateTo: '0x03',
     latestClaim: '0x02',
-    claimed: '50000.00 / 200000.00',
+    claimed: 50000.0,
+    grantAmount: 200000.0,
   },
   {
     title: 'Synthetix',
@@ -39,7 +50,8 @@ const grants = [
     date: new Date('2024-08-20'),
     delegateTo: '0x04',
     latestClaim: '0x03',
-    claimed: '180000.00 / 300000.00',
+    claimed: 180000.0,
+    grantAmount: 300000.0,
   },
   {
     title: 'Perpetual Protocol',
@@ -48,7 +60,8 @@ const grants = [
     date: new Date('2024-12-10'),
     delegateTo: '0x05',
     latestClaim: '0x04',
-    claimed: '90000.00 / 150000.00',
+    claimed: 90000.0,
+    grantAmount: 150000.0,
   },
   {
     title: 'Lyra Finance',
@@ -57,7 +70,8 @@ const grants = [
     date: new Date('2025-01-15'),
     delegateTo: '0x06',
     latestClaim: '0x05',
-    claimed: '120000.00 / 250000.00',
+    claimed: 120000.0,
+    grantAmount: 250000.0,
   },
   {
     title: 'Polynomial Protocol',
@@ -66,7 +80,8 @@ const grants = [
     date: new Date('2024-07-01'),
     delegateTo: '0x07',
     latestClaim: '0x06',
-    claimed: '80000.00 / 175000.00',
+    claimed: 80000.0,
+    grantAmount: 175000.0,
   },
 ];
 
@@ -83,7 +98,7 @@ const Grants = () => {
         <ClaimButton />
       </div>
       <div className="flex items-center gap-2 my-6">
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full">
           <input
             type="text"
             placeholder="Search grant"
@@ -91,49 +106,87 @@ const Grants = () => {
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
-        <Button variant="outline">Highest grant</Button>
+        <Select defaultValue="Highest">
+          <SelectTrigger className="w-[180px] bg-neutral-200">
+            <SelectValue placeholder="Select filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Highest" aria-selected>
+              <div className="flex items-center gap-2">
+                <span>Highest grant</span> <ArrowUpDown className="w-4 h-4" />
+              </div>
+            </SelectItem>
+            <SelectItem value="Lowest">Lowest grant</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <div className="bg-white w-full flex items-center justify-between p-2 rounded-lg">
+      <div className="bg-white w-full flex items-center justify-between py-3 px-10 rounded-lg">
         <p className="font-semibold">25 Projects</p>
         <p className="font-semibold">
           <span>Claimed</span> /{' '}
           <span className="text-gray-500">Grant amount</span>
         </p>
       </div>
-      <div className="flex flex-col gap-4 mt-4">
-        {grants.map((grant) => (
-          <Card className="border-none shadow-none" key={grant.title}>
-            <CardContent className="flex items-center gap-8 p-6">
-              <Hexagon className="w-10 h-10" />
-              <div className="flex flex-col gap-2 max-w-2xl">
-                <p className="font-semibold">{grant.title}</p>
-                <p className="text-sm text-gray-500 line-clamp-3">
-                  {grant.description}
-                </p>
-                <div className="flex h-5 items-center space-x-4 text-sm text-gray-500 mt-8">
-                  <p>
-                    Date of award:{' '}
-                    <span className="font-semibold">
-                      {grant.date.toLocaleDateString()}
-                    </span>
+      <ScrollArea className="mt-4">
+        <div className="flex flex-col gap-4">
+          {grants.map((grant) => (
+            <Card
+              className="border-none shadow-none py-8 px-10"
+              key={grant.title}
+            >
+              <CardContent className="flex items-center gap-8 p-0">
+                <Hexagon className="w-10 h-10" />
+                <div className="flex flex-col gap-2 max-w-2xl">
+                  <p className="font-semibold text-xl">{grant.title}</p>
+                  <p className="text-sm text-gray-500 line-clamp-3">
+                    {grant.description}
                   </p>
-                  <Separator orientation="vertical" />
-                  <p>
-                    Delegate to:{' '}
-                    <span className="font-semibold">{grant.delegateTo}</span>
-                  </p>
-                  <Separator orientation="vertical" />
-                  <p>
-                    Latest claim:{' '}
-                    <span className="font-semibold">{grant.latestClaim}</span>
-                  </p>
+                  <div className="flex h-5 items-center space-x-4 text-xs text-gray-500 mt-8">
+                    <p>
+                      Date of award:{' '}
+                      <span className="font-semibold text-black">
+                        {grant.date.toLocaleDateString()}
+                      </span>
+                    </p>
+                    <Separator orientation="vertical" />
+                    <div className="flex items-center gap-2">
+                      <p>Delegate to: </p>
+                      <Link
+                        className="group flex items-center font-semibold text-black"
+                        href="/grants"
+                      >
+                        {grant.delegateTo}{' '}
+                        <ArrowUpRight
+                          className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </div>
+                    <Separator orientation="vertical" />
+                    <div className="flex items-center gap-2">
+                      <p>Latest claim: </p>
+                      <Link
+                        className="group flex items-center font-semibold text-black"
+                        href="/grants"
+                      >
+                        {grant.latestClaim}{' '}
+                        <ArrowUpRight
+                          className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <p className="font-semibold">{grant.claimed}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div className="flex items-center gap-2 font-semibold">
+                  <span className="text-black">{grant.claimed}</span> /
+                  <span className="text-gray-500">{grant.grantAmount}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
     </>
   );
 };
