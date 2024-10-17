@@ -3,7 +3,7 @@
 import DelegateCard from '@/components/common/DelegateCard';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { DelegatesProvider, useDelegates } from '@/context/DelegatesContext';
+import { useDelegates } from '@/context/DelegatesContext';
 
 const DelegatesList = () => {
   const { displayedDelegates, loadMore, delegates } = useDelegates();
@@ -28,7 +28,7 @@ const DelegatesList = () => {
 
 const Delegates = () => {
   return (
-    <DelegatesProvider>
+    <>
       <div className="flex flex-col gap-6 items-start pt-20 max-w-2xl">
         <h1 className="text-4xl font-bold">Delegates</h1>
         <p>
@@ -38,7 +38,7 @@ const Delegates = () => {
         </p>
       </div>
       <DelegatesList />
-    </DelegatesProvider>
+    </>
   );
 };
 
