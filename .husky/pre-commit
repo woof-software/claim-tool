@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-pnpm biome check --apply .
+npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true
+git add .
