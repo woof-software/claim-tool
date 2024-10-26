@@ -1,8 +1,12 @@
+import type { Grant } from '@/context/GrantsContext';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter } from '../ui/card';
+import { DialogClose } from '../ui/dialog';
 import {
   Form,
   FormControl,
@@ -12,13 +16,18 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
+
 const FormSchema = z.object({
   delegateAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
     message: 'Invalid Ethereum address format.',
   }),
 });
 
-export default function ClaimCard() {
+export default function ClaimCard({ grant }: { grant: Grant }) {
+  const [step, setStep] = useState(1);
+  const router = useRouter();
+  const [delegateAddress, setDelegateAddress] = useState('');
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -27,40 +36,87 @@ export default function ClaimCard() {
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log({ data });
+    setDelegateAddress(data.delegateAddress);
+    setStep(2);
+  }
+
+  function handleClaim() {
+    console.log('Claiming rewards for delegate:', delegateAddress);
+    setStep(3);
+  }
+
+  function handleClose() {
+    console.log('Closing the claim process');
+    router.push('/grants');
   }
 
   return (
-    <Card className="border border-neutral-200 shadow-none p-10 max-w-[634px]">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+    <Card className="bg-transparent border border-neutral-300 shadow-none p-10 max-w-[634px]">
+      {step === 1 ? (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6">
+              <p className="text-lg">
+                To claim the milestone, you must appoint a delegate first. You
+                could view all the delegate profiles{' '}
+                <span className="font-semibold">here</span>.
+              </p>
+              <div className="grid w-full max-w-sm items-center gap-3">
+                <FormField
+                  control={form.control}
+                  name="delegateAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Enter the delegate's address</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="bg-transparent border-neutral-300"
+                          placeholder="0x..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="py-0">
+              <Button type="submit" variant="destructive">
+                Delegate
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      ) : step === 2 ? (
+        <>
           <CardContent className="space-y-6">
-            <p className="text-sm">
-              To claim the milestone, you must appoint a delegate first. You
-              could view all the delegate profiles{' '}
-              <span className="font-semibold">here</span>.
+            <p className="text-lg">
+              Excellent. You are now ready to claim your rewards
             </p>
-            <div className="grid w-full max-w-sm items-center gap-3">
-              <FormField
-                control={form.control}
-                name="delegateAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Enter the delegate's address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0x..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
           </CardContent>
           <CardFooter className="py-0">
-            <Button variant="destructive">Delegate</Button>
+            <Button onClick={handleClaim} variant="destructive">
+              Claim
+            </Button>
           </CardFooter>
-        </form>
-      </Form>
+        </>
+      ) : (
+        <>
+          <CardContent className="space-y-6">
+            <p className="text-lg">
+              All done! Your rewards have been successfully claimed.
+            </p>
+          </CardContent>
+          <CardFooter className="py-0">
+            <DialogClose asChild>
+              <Button onClick={handleClose} variant="outline">
+                Close
+              </Button>
+            </DialogClose>
+          </CardFooter>
+        </>
+      )}
     </Card>
   );
 }

@@ -1,25 +1,28 @@
 import type { Grant } from '@/context/GrantsContext';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import GrantCard from './GrantCard';
 
 const GrantsList = ({
   grants,
+  isClaimDialogOpen,
+  onSelectGrant,
 }: {
   grants: Grant[];
+  isClaimDialogOpen?: boolean;
+  onSelectGrant?: (id: string) => void;
 }) => {
-  const pathname = usePathname();
-  const isClaimPage = pathname.startsWith('/claim');
-
   return (
     <ScrollArea className="mt-4">
       <div className="flex flex-col gap-4">
         {grants.map((grant) =>
-          isClaimPage ? (
-            <Link href={`/claim/${grant.id}`} key={grant.id}>
-              <GrantCard grant={grant} />
-            </Link>
+          isClaimDialogOpen ? (
+            <div
+              onClick={() => onSelectGrant?.(grant.id)}
+              onKeyDown={(e) => e.key === 'Enter' && onSelectGrant?.(grant.id)}
+              key={grant.id}
+            >
+              <GrantCard grant={grant} isClaimDialogOpen />
+            </div>
           ) : (
             <GrantCard key={grant.id} grant={grant} />
           ),

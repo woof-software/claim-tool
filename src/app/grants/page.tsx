@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { type FilterOption, useGrants } from '@/context/GrantsContext';
+import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -19,7 +19,7 @@ const Grants = () => {
   const { displayedGrants, loadMore, grants } = useGrants();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<FilterOption>('Highest');
+  const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
 
   const claimableGrants = useMemo(() => {
     return grants.filter((grant) => grant.canClaim);
@@ -37,16 +37,16 @@ const Grants = () => {
     }
 
     switch (filter) {
-      case 'Highest':
+      case FilterOption.Highest:
         filtered.sort((a, b) => b.grantAmount - a.grantAmount);
         break;
-      case 'Lowest':
+      case FilterOption.Lowest:
         filtered.sort((a, b) => a.grantAmount - b.grantAmount);
         break;
-      case 'MostClaimed':
+      case FilterOption.MostClaimed:
         filtered.sort((a, b) => b.claimed - a.claimed);
         break;
-      case 'LeastClaimed':
+      case FilterOption.LeastClaimed:
         filtered.sort((a, b) => a.claimed - b.claimed);
         break;
     }
@@ -63,15 +63,15 @@ const Grants = () => {
           delegated to. For grantees, this claiming tool offers a self-serve
           interface to claim and delegate your grant.
         </p>
-        {claimableGrants.length > 0 && (
-          <div className="flex items-center gap-4">
-            <ClaimButton grantIds={claimableGrantIds} />
+        <div className="flex items-center gap-4">
+          <ClaimButton grantIds={claimableGrantIds} />
+          {claimableGrants.length > 0 && (
             <span className="text-sm font-medium text-gray-500">
               {claimableGrants.length} grant
               {claimableGrants.length > 1 ? 's' : ''} available to claim
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2 my-6">
         <div className="relative w-full">

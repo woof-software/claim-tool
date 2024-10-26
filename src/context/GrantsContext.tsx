@@ -1,11 +1,12 @@
 import type React from 'react';
 import { createContext, useContext, useState } from 'react';
 
-export type FilterOption =
-  | 'Highest'
-  | 'Lowest'
-  | 'MostClaimed'
-  | 'LeastClaimed';
+export enum FilterOption {
+  Highest = 'Highest',
+  Lowest = 'Lowest',
+  MostClaimed = 'MostClaimed',
+  LeastClaimed = 'LeastClaimed',
+}
 
 export type Grant = {
   id: string;
