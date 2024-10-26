@@ -1,17 +1,36 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Grant } from '@/context/GrantsContext';
+import { cn } from '@/lib/utils';
 import { ArrowUpRight, Hexagon } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 
-const GrantCard = ({ grant }: { grant: Grant }) => {
+const GrantCard = ({
+  grant,
+}: {
+  grant: Grant;
+}) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const handleClaim = () => {
-    console.log('claim');
+    router.push(`/claim/${grant.id}`);
   };
+
+  const isClaimPage = pathname.startsWith('/claim');
+
   return (
-    <Card className="border-none shadow-none">
-      {grant.canClaim && (
+    <Card
+      className={cn(
+        'border-none shadow-none',
+        isClaimPage
+          ? 'border border-neutral-200 hover:border-blue-500 cursor-pointer'
+          : '',
+      )}
+    >
+      {grant.canClaim && !isClaimPage && (
         <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
           <p className="text-sm">You are eligible to claim this grant</p>
           <Button

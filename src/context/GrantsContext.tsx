@@ -1,7 +1,14 @@
 import type React from 'react';
 import { createContext, useContext, useState } from 'react';
 
+export type FilterOption =
+  | 'Highest'
+  | 'Lowest'
+  | 'MostClaimed'
+  | 'LeastClaimed';
+
 export type Grant = {
+  id: string;
   title: string;
   description: string;
   date: Date;
@@ -35,6 +42,7 @@ type GrantsProviderProps = {
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const grants: Grant[] = [
     {
+      id: '1',
       title: 'Party Protocol',
       description:
         'The Party Protocol is an open-source protocol for group coordination. It provides flexible and powerful primitives for creating a shared smart contract account governed by a group of people, big or small. Party.app is the flagship UI / app built on top. It allows groups to form a small group wallet, and large on-chain DAO, or anything in-between. Party.app has built-in functionality for crowdfunding, governance, using apps via wallet connect, buying & selling NFTs, trading tokens, chatting, and much more.',
@@ -46,6 +54,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: true,
     },
     {
+      id: '2',
       title: 'Optimism Collective',
       description:
         'The Optimism Collective is a large-scale experiment in digital democratic governance, built to drive rapid and sustainable growth of the Optimism ecosystem.',
@@ -57,6 +66,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '3',
       title: 'Velodrome Finance',
       description:
         'Velodrome is a next-generation AMM built on the Optimism network, designed to maximize capital efficiency and provide sustainable rewards for liquidity providers.',
@@ -65,9 +75,10 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       latestClaim: '0x02',
       claimed: 50000.0,
       grantAmount: 200000.0,
-      canClaim: false,
+      canClaim: true,
     },
     {
+      id: '4',
       title: 'Synthetix',
       description:
         'Synthetix is a decentralized platform on Ethereum for creating and trading synthetic assets. It allows users to gain exposure to a wide range of assets without directly holding them.',
@@ -79,6 +90,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '5',
       title: 'Perpetual Protocol',
       description:
         'Perpetual Protocol is a decentralized perpetual contract trading protocol for every asset, empowering traders, liquidity providers & developers to participate in an open financial market with no barriers to entry.',
@@ -90,6 +102,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '6',
       title: 'Lyra Finance',
       description:
         'Lyra is an options trading protocol built on Ethereum L2s. It provides a decentralized options trading platform with competitive pricing and deep liquidity.',
@@ -101,6 +114,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '7',
       title: 'Polynomial Protocol',
       description:
         'Polynomial is a decentralized options and structured products protocol, enabling users to create, trade, and manage complex financial instruments on-chain.',
@@ -112,6 +126,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '8',
       title: 'DeFi Yield Optimizer',
       description:
         'A smart contract system that automatically maximizes yields across various DeFi protocols.',
@@ -123,6 +138,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '9',
       title: 'DeFi Pulse',
       description:
         'A decentralized platform for tracking DeFi metrics and providing insights.',
@@ -134,6 +150,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '10',
       title: 'DeFi Safety',
       description:
         'A decentralized platform for monitoring DeFi protocol security and providing alerts.',
@@ -145,6 +162,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '11',
       title: 'DeFi Analytics',
       description:
         'A decentralized platform for providing DeFi protocol analytics and insights.',
@@ -156,6 +174,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '12',
       title: 'DeFi Governance',
       description:
         'A decentralized platform for facilitating DeFi protocol governance and decision-making.',
@@ -167,6 +186,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '13',
       title: 'DeFi Security',
       description:
         'A decentralized platform for providing DeFi protocol security and risk management.',
@@ -178,6 +198,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '14',
       title: 'DeFi Innovation',
       description:
         'A decentralized platform for fostering DeFi protocol innovation and development.',
@@ -189,6 +210,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       canClaim: false,
     },
     {
+      id: '15',
       title: 'DeFi Education',
       description:
         'A decentralized platform for providing DeFi protocol education and training.',

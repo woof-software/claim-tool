@@ -22,8 +22,8 @@ export default function RootLayout({
           <div className="mx-auto max-w-5xl">{children}</div>
           <Footer />
         </ContextProvider>
-        <div className="absolute top-0 bottom-0 left-0 right-0 w-full h-full -z-10 flex items-center justify-center">
-          <BackgroundImage />
+        <div className="fixed inset-0 w-full h-full -z-10 flex items-center justify-center">
+          <BackgroundImage className="object-cover" />
         </div>
       </body>
     </html>
