@@ -1,6 +1,7 @@
 import ClaimButton from '@/components/ClaimButton';
 import ClaimsList from '@/components/ClaimsList';
 import ConnectButton from '@/components/ConnectButton';
+import GrantsList from '@/components/GrantsList';
 import React from 'react';
 
 const Home = () => {
@@ -9,6 +10,7 @@ const Home = () => {
       <ConnectButton />
       <ClaimButton />
       <ClaimsList />
+      <GrantsList />
     </div>
   );
 };
