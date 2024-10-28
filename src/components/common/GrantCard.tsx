@@ -2,8 +2,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Grant } from '@/context/GrantsContext';
 import { cn } from '@/lib/utils';
 import { ArrowUpRight, Hexagon } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import OPLogo from '../../../public/op.svg';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -88,6 +90,13 @@ const GrantCard = ({
             </div>
           </div>
           <div className="flex items-center gap-2 font-semibold">
+            <Image
+              className="rounded-full flex-shrink-0 flex relative"
+              alt="OP Logo"
+              src={OPLogo}
+              width={24}
+              height={24}
+            />
             <span className="text-black">{grant.claimed}</span> /
             <span className="text-gray-500">{grant.grantAmount}</span>
           </div>

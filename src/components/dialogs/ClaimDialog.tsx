@@ -4,7 +4,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import Image from 'next/image';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
-import { optimism } from 'viem/chains';
+import OPLogo from '../../../public/op.svg';
 import ClaimCard from '../common/ClaimCard';
 import GrantsList from '../common/GrantList';
 import InfoCard from '../common/InfoCard';
@@ -28,9 +28,6 @@ export function ClaimDialog({
   const selectedGrant = selectedGrantId
     ? grants.find((grant) => grant.id === selectedGrantId)
     : undefined;
-
-  const { name } = optimism ?? {};
-  const icon = `https://icons.llamao.fi/icons/chains/rsz_${name?.toLowerCase()}.jpg`;
 
   const handleGrantSelect = (id: string) => {
     setSelectedGrantId(id);
@@ -60,10 +57,10 @@ export function ClaimDialog({
                 <span className="bg-neutral-200 rounded-md p-3 flex items-center gap-2 w-fit">
                   <Image
                     className="rounded-full flex-shrink-0 flex relative"
-                    alt={`${name} Logo`}
-                    src={icon}
-                    width={20}
-                    height={20}
+                    alt="OP Logo"
+                    src={OPLogo}
+                    width={24}
+                    height={24}
                   />
                   {selectedGrant?.grantAmount}
                 </span>
