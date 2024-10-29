@@ -1,10 +1,9 @@
 'use client';
 
 import ClaimButton from '@/components/ClaimButton';
-import GrantCard from '@/components/common/GrantCard';
+import GrantsList from '@/components/common/GrantList';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -12,63 +11,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useGrants } from '@/context/GrantsContext';
+import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-type FilterOption = 'Highest' | 'Lowest' | 'MostClaimed' | 'LeastClaimed';
-
-const GrantsList = ({
-  searchTerm,
-  filter,
-}: { searchTerm: string; filter: FilterOption }) => {
+const Grants = () => {
   const { displayedGrants, loadMore, grants } = useGrants();
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
+
+  const claimableGrants = useMemo(() => {
+    return grants.filter((grant) => grant.canClaim);
+  }, [grants]);
+
+  const claimableGrantIds = claimableGrants.map((grant) => grant.id);
+
   const filteredAndSortedGrants = useMemo(() => {
-    const filtered = displayedGrants.filter((grant) =>
-      grant.title.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    let filtered = displayedGrants;
+
+    if (searchTerm) {
+      filtered = filtered.filter((grant) =>
+        grant.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
 
     switch (filter) {
-      case 'Highest':
+      case FilterOption.Highest:
         filtered.sort((a, b) => b.grantAmount - a.grantAmount);
         break;
-      case 'Lowest':
+      case FilterOption.Lowest:
         filtered.sort((a, b) => a.grantAmount - b.grantAmount);
         break;
-      case 'MostClaimed':
+      case FilterOption.MostClaimed:
         filtered.sort((a, b) => b.claimed - a.claimed);
         break;
-      case 'LeastClaimed':
+      case FilterOption.LeastClaimed:
         filtered.sort((a, b) => a.claimed - b.claimed);
         break;
     }
 
     return filtered;
   }, [displayedGrants, searchTerm, filter]);
-
-  return (
-    <ScrollArea className="mt-4">
-      <div className="flex flex-col gap-4">
-        {filteredAndSortedGrants.map((grant) => (
-          <GrantCard key={grant.title} grant={grant} />
-        ))}
-      </div>
-      {displayedGrants.length < grants.length && !searchTerm && (
-        <div className="mt-4 flex justify-center">
-          <Button onClick={loadMore} variant="outline">
-            Load More
-          </Button>
-        </div>
-      )}
-    </ScrollArea>
-  );
-};
-
-const Grants = () => {
-  const { grants } = useGrants();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<FilterOption>('Highest');
 
   return (
     <>
@@ -79,7 +63,15 @@ const Grants = () => {
           delegated to. For grantees, this claiming tool offers a self-serve
           interface to claim and delegate your grant.
         </p>
-        <ClaimButton />
+        <div className="flex items-center gap-4">
+          <ClaimButton grantIds={claimableGrantIds} />
+          {claimableGrants.length > 0 && (
+            <span className="text-sm font-medium text-gray-500">
+              {claimableGrants.length} grant
+              {claimableGrants.length > 1 ? 's' : ''} available to claim
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2 my-6">
         <div className="relative w-full">
@@ -114,7 +106,14 @@ const Grants = () => {
           <span className="text-gray-500">Grant amount</span>
         </p>
       </div>
-      <GrantsList searchTerm={searchTerm} filter={filter} />
+      <GrantsList grants={filteredAndSortedGrants} />
+      {filteredAndSortedGrants.length < grants.length && (
+        <div className="mt-4 flex justify-center">
+          <Button onClick={loadMore} variant="outline">
+            Load More
+          </Button>
+        </div>
+      )}
     </>
   );
 };

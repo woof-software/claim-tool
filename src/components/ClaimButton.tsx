@@ -2,30 +2,29 @@
 
 import { Button } from '@/components/ui/button';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useState } from 'react';
 import { useAccount } from 'wagmi';
+import { ClaimDialog } from './dialogs/ClaimDialog';
 
-const ClaimButton = () => {
+const ClaimButton = ({ grantIds }: { grantIds: string[] }) => {
   const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
+  const [showClaimDialog, setShowClaimDialog] = useState(false);
+
   const handleClick = () => {
-    console.log('claim');
+    if (isConnected) {
+      setShowClaimDialog(true);
+    } else {
+      openConnectModal?.();
+    }
   };
 
   return (
     <>
-      {isConnected ? (
-        <Button className="p-6" onClick={handleClick} variant="destructive">
-          Claim now
-        </Button>
-      ) : (
-        <Button
-          className="p-6"
-          onClick={openConnectModal}
-          variant="destructive"
-        >
-          Connect to claim
-        </Button>
-      )}
+      <Button className="p-6" onClick={handleClick} variant="destructive">
+        {isConnected ? 'Claim now' : 'Connect to claim'}
+      </Button>
+      <ClaimDialog isOpen={showClaimDialog} setOpen={setShowClaimDialog} />
     </>
   );
 };
