@@ -1,14 +1,15 @@
 import { Markdown } from '@/components/common/Markdown';
 import { Card, CardContent } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
 import type { Delegate } from '@/types/delegates';
 import {
+  RiCheckboxCircleFill,
   RiDiscordFill,
   RiFileCopyLine,
   RiTwitterXLine,
 } from '@remixicon/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import type { Address } from 'viem';
 import Mirror from '../../../public/mirror.svg';
 import { AvatarENS, NameENS } from '../Ens';
@@ -25,20 +26,18 @@ const DelegateCard = ({ delegate }: DelegateCardProps) => {
   const { discord, twitter, warpcast, payload } = statement ?? {};
   const { delegateStatement } = payload ?? {};
 
+  const [copied, setCopied] = useState(false);
+
   const handleCopyAddress = async () => {
     try {
       await navigator.clipboard.writeText(address);
-      toast({
-        title: 'Copied to clipboard',
-        duration: 2000,
-      });
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch (error) {
       console.error('Failed to copy address:', error);
-      toast({
-        title: 'Failed to copy address',
-        variant: 'destructive',
-        duration: 2000,
-      });
+      setCopied(false);
     }
   };
 
@@ -52,13 +51,17 @@ const DelegateCard = ({ delegate }: DelegateCardProps) => {
         <div className="flex items-center gap-2">
           <AvatarENS address={address as Address} />
           <div className="flex flex-col">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <NameENS
                 className="font-semibold text-xl"
                 address={address as Address}
               />
               <Button size="icon" variant="link" onClick={handleCopyAddress}>
-                <RiFileCopyLine className="text-neutral-600 w-4 h-4" />
+                {copied ? (
+                  <RiCheckboxCircleFill className="text-green-600 w-4 h-4" />
+                ) : (
+                  <RiFileCopyLine className="text-neutral-600 w-4 h-4" />
+                )}
               </Button>
             </div>
             <div className="flex items-center gap-2 text-neutral-600">

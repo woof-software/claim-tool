@@ -1,8 +1,10 @@
 import { truncate } from '@/lib/truncate';
-import type { ComponentProps } from 'react';
+import Image from 'next/image';
+import { type ComponentProps, useEffect, useState } from 'react';
 import type { Address } from 'viem';
 import { normalize } from 'viem/ens';
 import { useEnsAvatar, useEnsName } from 'wagmi';
+import opDelegate from '../../public/op-delegate.svg';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function AvatarENS({
@@ -20,10 +22,21 @@ export function AvatarENS({
     name: normalize(name ?? ''),
     query: { enabled: Boolean(name) },
   });
+
+  const [avatar, setAvatar] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (src) {
+      setAvatar(src);
+    }
+  }, [src]);
+
   return (
     <Avatar {...props}>
-      <AvatarImage src={src ?? ''} alt={name ?? address} />
-      <AvatarFallback className="bg-gray-300" />
+      <AvatarImage src={avatar ?? ''} alt={name ?? address} />
+      <AvatarFallback>
+        <Image src={opDelegate} alt="OP Delegate" width={44} height={44} />
+      </AvatarFallback>
     </Avatar>
   );
 }
@@ -42,9 +55,17 @@ export function NameENS({
     query: { enabled: Boolean(address) },
   });
 
+  const [ensName, setEnsName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (name) {
+      setEnsName(name);
+    }
+  }, [name]);
+
   return (
     <div {...props} title={address}>
-      {name ?? truncate(address, truncateLength)}
+      {ensName ?? truncate(address, truncateLength)}
     </div>
   );
 }
