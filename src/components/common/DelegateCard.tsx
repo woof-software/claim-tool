@@ -1,79 +1,111 @@
 import { Markdown } from '@/components/common/Markdown';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Delegate } from '@/context/DelegatesContext';
-import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import type { Delegate } from '@/types/delegates';
 import {
   RiDiscordFill,
   RiFileCopyLine,
-  RiHexagonLine,
   RiTwitterXLine,
 } from '@remixicon/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import type { Address } from 'viem';
 import Mirror from '../../../public/mirror.svg';
+import { AvatarENS, NameENS } from '../Ens';
 import { Button } from '../ui/button';
 
-const DelegateCard = ({ delegate }: { delegate: Delegate }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showReadMore, setShowReadMore] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
+interface DelegateCardProps {
+  delegate: Delegate | null;
+}
 
-  useEffect(() => {
-    const checkHeight = () => {
-      if (contentRef.current) {
-        const lineHeight = Number.parseInt(
-          getComputedStyle(contentRef.current).lineHeight,
-        );
-        const maxHeight = lineHeight * 3;
-        setShowReadMore(contentRef.current.scrollHeight > maxHeight);
-      }
-    };
+const DelegateCard = ({ delegate }: DelegateCardProps) => {
+  if (!delegate?.address) return null;
 
-    checkHeight();
-    window.addEventListener('resize', checkHeight);
-    return () => window.removeEventListener('resize', checkHeight);
-  }, []);
+  const { address, statement } = delegate;
+  const { discord, twitter, warpcast, payload } = statement ?? {};
+  const { delegateStatement } = payload ?? {};
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      toast({
+        title: 'Copied to clipboard',
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Failed to copy address:', error);
+      toast({
+        title: 'Failed to copy address',
+        variant: 'destructive',
+        duration: 2000,
+      });
+    }
   };
+
+  const isValidSocialHandle = (handle: string | undefined): boolean => {
+    return !!handle && handle !== 'N/A';
+  };
+
   return (
-    <Card key={delegate.address} className="border-none shadow-none p-8">
+    <Card className="border-none shadow-none p-8">
       <CardContent className="flex flex-col items-start gap-4">
         <div className="flex items-center gap-2">
-          <RiHexagonLine className="w-10 h-10" />
+          <AvatarENS address={address as Address} />
           <div className="flex flex-col">
-            <p className="font-semibold text-xl flex items-center text-neutral-600">
-              {delegate.address}
-              <Button size="icon" variant="link">
+            <div className="flex items-center gap-2">
+              <NameENS
+                className="font-semibold text-xl"
+                address={address as Address}
+              />
+              <Button size="icon" variant="link" onClick={handleCopyAddress}>
                 <RiFileCopyLine className="text-neutral-600 w-4 h-4" />
               </Button>
-            </p>
+            </div>
             <div className="flex items-center gap-2 text-neutral-600">
-              <Link href={`https://twitter.com/${delegate.twitter}`}>
-                <RiTwitterXLine className="h-4 w-4" />
-              </Link>
-              <Link href={`https://discord.gg/${delegate.discord}`}>
-                <RiDiscordFill className="w-4 h-4" />
-              </Link>
-              <Link href={`https://mirror.xyz/${delegate.mirror}`}>
-                <Image src={Mirror} alt="Mirror" width={16} height={16} />
-              </Link>
+              {isValidSocialHandle(twitter) && (
+                <Link
+                  href={`https://twitter.com/${twitter}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <RiTwitterXLine className="h-4 w-4" />
+                </Link>
+              )}
+              {isValidSocialHandle(discord) && (
+                <Link
+                  href={`https://discord.gg/${discord}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <RiDiscordFill className="w-4 h-4" />
+                </Link>
+              )}
+              {isValidSocialHandle(warpcast) && (
+                <Link
+                  href={`https://warpcast.com/${warpcast}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Mirror} alt="Mirror" width={16} height={16} />
+                </Link>
+              )}
             </div>
           </div>
         </div>
-        <div
-          ref={contentRef}
-          className={cn('w-full', !isExpanded && 'line-clamp-3')}
-        >
-          <Markdown>{delegate.description}</Markdown>
-        </div>
-        {showReadMore && (
-          <Button variant="link" className="p-0" onClick={toggleExpand}>
-            {isExpanded ? 'Read less' : 'Read more'}
-          </Button>
+        {delegateStatement && (
+          <div className="w-full line-clamp-3">
+            <Markdown>{delegateStatement}</Markdown>
+          </div>
         )}
+        <Button variant="link" className="p-0" asChild>
+          <Link
+            href={`https://vote.optimism.io/delegates/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read more
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

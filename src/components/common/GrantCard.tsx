@@ -5,6 +5,7 @@ import { ArrowUpRight, Hexagon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAccount } from 'wagmi';
 import OPLogo from '../../../public/op.svg';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
@@ -18,6 +19,7 @@ const GrantCard = ({
   isClaimDialogOpen?: boolean;
 }) => {
   const [showClaimDialog, setShowClaimDialog] = useState(false);
+  const { isConnected } = useAccount();
 
   const handleClaim = () => {
     setShowClaimDialog(true);
@@ -31,7 +33,7 @@ const GrantCard = ({
           isClaimDialogOpen && 'border border-neutral-300 cursor-pointer',
         )}
       >
-        {grant.canClaim && !isClaimDialogOpen && (
+        {grant.canClaim && !isClaimDialogOpen && isConnected && (
           <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
             <p className="text-sm">You are eligible to claim this grant</p>
             <Button

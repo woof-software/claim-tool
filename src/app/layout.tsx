@@ -1,8 +1,8 @@
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
 import BackgroundImage from '@/components/common/images/BgImage';
+import { Toaster } from '@/components/ui/toaster';
 import ContextProvider from '@/context';
 import type { Metadata } from 'next';
+import ClientLayout from './client-layout';
 import { inter, sora } from './fonts';
 import './globals.css';
 
@@ -18,13 +18,12 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${sora.variable}`}>
       <body className="bg-secondary">
         <ContextProvider>
-          <Header />
-          <div className="mx-auto max-w-5xl">{children}</div>
-          <Footer />
+          <ClientLayout>{children}</ClientLayout>
         </ContextProvider>
         <div className="fixed inset-0 w-full h-full -z-10 flex items-center justify-center">
           <BackgroundImage className="object-cover" />
         </div>
+        <Toaster />
       </body>
     </html>
   );

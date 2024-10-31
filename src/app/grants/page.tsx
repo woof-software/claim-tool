@@ -14,10 +14,11 @@ import {
 import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 const Grants = () => {
   const { displayedGrants, loadMore, grants } = useGrants();
-
+  const { isConnected } = useAccount();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
 
@@ -65,7 +66,7 @@ const Grants = () => {
         </p>
         <div className="flex items-center gap-4">
           <ClaimButton grantIds={claimableGrantIds} />
-          {claimableGrants.length > 0 && (
+          {claimableGrants.length > 0 && isConnected && (
             <span className="text-sm font-medium text-gray-500">
               {claimableGrants.length} grant
               {claimableGrants.length > 1 ? 's' : ''} available to claim
