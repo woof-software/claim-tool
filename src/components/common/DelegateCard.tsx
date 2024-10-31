@@ -93,7 +93,7 @@ const DelegateCard = ({ delegate }: DelegateCardProps) => {
           </div>
         </div>
         {delegateStatement && (
-          <div className="w-full line-clamp-3">
+          <div className="w-full line-clamp-2">
             <Markdown>{delegateStatement}</Markdown>
           </div>
         )}
