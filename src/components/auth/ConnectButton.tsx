@@ -1,9 +1,18 @@
 'use client';
 
+import { useDisconnect } from '@/hooks/useAuth';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { RiFileHistoryLine, RiLogoutBoxRLine } from '@remixicon/react';
 import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 const WalletConnectButton = () => {
+  const { disconnect } = useDisconnect();
   return (
     <ConnectButton.Custom>
       {({
@@ -91,18 +100,31 @@ const WalletConnectButton = () => {
                     )}
                     {chain.name}
                   </Button>
-
-                  <Button
-                    variant="outline"
-                    className="border-secondary-foreground"
-                    onClick={openAccountModal}
-                    type="button"
-                  >
-                    {account.displayName}
-                    {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ''}
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-secondary-foreground"
+                        type="button"
+                      >
+                        {account.displayName}
+                        {account.displayBalance
+                          ? ` (${account.displayBalance})`
+                          : ''}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuItem className="flex items-center justify-between px-6 font-semibold">
+                        Claim History <RiFileHistoryLine />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="flex items-center justify-between px-6 font-semibold"
+                        onClick={disconnect}
+                      >
+                        Disconnect <RiLogoutBoxRLine />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               );
             })()}
