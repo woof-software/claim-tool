@@ -5,7 +5,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
-import { optimism, optimismSepolia } from 'wagmi/chains';
+import { mainnet, optimism, optimismSepolia } from 'wagmi/chains';
 import { DelegatesProvider } from './DelegatesContext';
 import { GrantsProvider } from './GrantsContext';
 
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 const config = getDefaultConfig({
   appName: 'OP Claim Tool',
   projectId,
-  chains: [optimism, optimismSepolia],
+  chains: [mainnet, optimism, optimismSepolia],
   ssr: true,
 });
 

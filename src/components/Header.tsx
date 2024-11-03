@@ -1,6 +1,6 @@
 'use client';
 
-import ConnectButton from '@/components/ConnectButton';
+import ConnectButton from '@/components/auth/ConnectButton';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from './common/images/Logo';
