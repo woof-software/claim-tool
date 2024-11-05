@@ -1,7 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Grant } from '@/context/GrantsContext';
 import { cn } from '@/lib/utils';
-import { ArrowUpRight, Hexagon } from 'lucide-react';
+import { RiArrowRightUpLine } from '@remixicon/react';
+import { Hexagon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -68,7 +69,7 @@ const GrantCard = ({
                     href="/grants"
                   >
                     {grant.delegateTo}{' '}
-                    <ArrowUpRight
+                    <RiArrowRightUpLine
                       className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
                       aria-hidden="true"
                     />
@@ -82,7 +83,7 @@ const GrantCard = ({
                     href="/grants"
                   >
                     {grant.latestClaim}{' '}
-                    <ArrowUpRight
+                    <RiArrowRightUpLine
                       className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
                       aria-hidden="true"
                     />

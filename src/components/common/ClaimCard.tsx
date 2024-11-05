@@ -1,5 +1,7 @@
 import type { Grant } from '@/context/GrantsContext';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { RiArrowRightUpLine } from '@remixicon/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,6 +18,7 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
+import SuccessCheckmark from './images/SuccessCheckmark';
 
 const FormSchema = z.object({
   delegateAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
@@ -51,16 +54,25 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   }
 
   return (
-    <Card className="bg-transparent border border-neutral-300 shadow-none p-10 max-w-[634px]">
+    <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
       {step === 1 ? (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
               <p className="text-lg">
-                To claim the milestone, you must appoint a delegate first. You
-                could view all the delegate profiles{' '}
-                <span className="font-semibold">here</span>.
+                To claim the milestone, you must appoint a delegate first.
               </p>
+              <Link
+                className="group flex items-center font-semibold text-lg text-black"
+                href="https://vote.optimism.io/delegates"
+                target="_blank"
+              >
+                View all the delegate profiles
+                <RiArrowRightUpLine
+                  className="ml-1 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                  aria-hidden="true"
+                />
+              </Link>
               <div className="grid w-full max-w-sm items-center gap-3">
                 <FormField
                   control={form.control}
@@ -103,18 +115,15 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
         </>
       ) : (
         <>
-          <CardContent className="space-y-6">
-            <p className="text-lg">
-              All done! Your rewards have been successfully claimed.
-            </p>
-          </CardContent>
-          <CardFooter className="py-0">
+          <CardContent className="p-0 space-y-6 flex flex-col items-center">
+            <p className="text-lg">All done!</p>
+            <SuccessCheckmark />
             <DialogClose asChild>
               <Button onClick={handleClose} variant="outline">
                 Close
               </Button>
             </DialogClose>
-          </CardFooter>
+          </CardContent>
         </>
       )}
     </Card>

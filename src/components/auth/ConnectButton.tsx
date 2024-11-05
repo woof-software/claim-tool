@@ -3,6 +3,7 @@
 import { useDisconnect } from '@/hooks/useAuth';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { RiFileHistoryLine, RiLogoutBoxRLine } from '@remixicon/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ const WalletConnectButton = () => {
         authenticationStatus,
         mounted,
       }) => {
+        const router = useRouter();
         const ready = mounted && authenticationStatus !== 'loading';
         const connected =
           ready &&
@@ -114,7 +116,10 @@ const WalletConnectButton = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
-                      <DropdownMenuItem className="flex items-center justify-between px-6 font-semibold">
+                      <DropdownMenuItem
+                        className="flex items-center justify-between px-6 font-semibold"
+                        onClick={() => router.push('/claim')}
+                      >
                         Claim History <RiFileHistoryLine />
                       </DropdownMenuItem>
                       <DropdownMenuItem
