@@ -57,7 +57,7 @@ const Grants = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-6 items-start pt-20 max-w-2xl">
+      <div className="flex flex-col gap-6 items-start">
         <h1 className="text-4xl font-bold">Grants</h1>
         <p>
           Explore all grants from the OP Citizen Grants Council and who they've

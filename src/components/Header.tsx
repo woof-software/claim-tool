@@ -32,10 +32,10 @@ const Header = () => {
         <div className="flex items-center gap-4">
           {links.map((link) => (
             <Button
-              className={`h-full rounded-none py-6 ${
+              className={`h-full rounded-none py-6 group relative ${
                 pathname === link.href
                   ? 'border-b-4 border-secondary-foreground'
-                  : 'transition duration-300 ease-in-out hover:border-b-4 hover:border-secondary-foreground'
+                  : 'before:absolute before:bottom-0 before:left-0 before:w-full before:h-1 before:bg-secondary-foreground before:transform before:scale-x-0 before:origin-right hover:before:scale-x-100 hover:before:origin-left before:transition-transform before:duration-300 before:ease-out'
               }`}
               variant={null}
               asChild

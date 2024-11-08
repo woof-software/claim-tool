@@ -23,7 +23,7 @@ export const TransactionCard = ({
       <CardContent className="py-8 px-10 space-y-6">
         <p className="text-sm font-semibold">{date}</p>
         <div className="flex items-center space-x-4 text-xs text-gray-500">
-          <p>
+          <p className="flex items-center gap-2">
             Milestone:{' '}
             <span className="font-semibold text-black">{milestone}</span>
           </p>
