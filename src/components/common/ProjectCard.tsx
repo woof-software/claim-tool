@@ -1,16 +1,63 @@
-import { Hexagon } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
+import OPLogo from '../../../public/op.svg';
+import ClaimButton from '../ClaimButton';
 
-export default function ProjectCard({ title }: { title?: string }) {
+interface ProjectCardProps {
+  title?: string;
+  projectCount?: number;
+  totalAwarded?: number;
+  remainingAmount?: number;
+  grantIds?: string[];
+}
+
+const ProjectCard = ({
+  projectCount = 1,
+  totalAwarded = 30000,
+  remainingAmount = 2000,
+  grantIds = ['1'],
+}: ProjectCardProps) => {
   return (
-    <Card className="w-[430px] h-[212px] bg-neutral-100 border-none shadow-none">
-      <CardContent className="p-10">
-        <h2 className="text-xl font-bold mb-6">Your Project</h2>
-        <div className="flex items-center gap-2">
-          <Hexagon className="w-10 h-10" />
-          {title && <p className="text-xl font-semibold">{title}</p>}
+    <Card className="w-[424px] border-black shadow-none bg-transparent">
+      <CardContent className="py-8 px-10 space-y-6">
+        <div className="flex items-center justify-between">
+          <p>Awarded project</p>
+          <p className="text-lg font-semibold">{projectCount}</p>
         </div>
+        <div className="flex items-center justify-between">
+          <p>Total awarded amount</p>
+          <div className="flex items-center gap-2">
+            <Image
+              className="rounded-full flex-shrink-0 flex relative"
+              alt="OP Logo"
+              src={OPLogo}
+              width={24}
+              height={24}
+            />
+            <p className="text-lg font-semibold">
+              {totalAwarded.toLocaleString()}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <p>Remaining/Unclaimed</p>
+          <div className="flex items-center gap-2">
+            <Image
+              className="rounded-full flex-shrink-0 flex relative"
+              alt="OP Logo"
+              src={OPLogo}
+              width={24}
+              height={24}
+            />
+            <p className="text-lg font-semibold">
+              {remainingAmount.toLocaleString()}
+            </p>
+          </div>
+        </div>
+        <ClaimButton grantIds={grantIds} />
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ProjectCard;
