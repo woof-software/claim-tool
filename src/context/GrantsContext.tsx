@@ -43,7 +43,7 @@ type GrantsProviderProps = {
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const grants: Grant[] = [
     {
-      id: '1',
+      id: 'e23db1a6-3a9b-48bf-8a06-bb39c2298435',
       title: 'Party Protocol',
       description:
         'The Party Protocol is an open-source protocol for group coordination. It provides flexible and powerful primitives for creating a shared smart contract account governed by a group of people, big or small. Party.app is the flagship UI / app built on top. It allows groups to form a small group wallet, and large on-chain DAO, or anything in-between. Party.app has built-in functionality for crowdfunding, governance, using apps via wallet connect, buying & selling NFTs, trading tokens, chatting, and much more.',

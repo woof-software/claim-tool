@@ -1,4 +1,6 @@
 import type { Grant } from '@/context/GrantsContext';
+import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
+import { useGetClaim } from '@/hooks/useGetClaim';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -23,10 +25,16 @@ const FormSchema = z.object({
   }),
 });
 
+const claimId = 'e23db1a6-3a9b-48bf-8a06-bb39c2298435';
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const [delegateAddress, setDelegateAddress] = useState('');
+  console.log(grant);
+  const { claim } = useGetClaim({
+    uuid: grant.id,
+  });
+  const { mutateAsync: claimAndDelegate } = useContractClaimAndDelegate();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -40,9 +48,19 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     setStep(2);
   }
 
-  function handleClaim() {
+  async function handleClaim() {
+    if (!claim) {
+      console.error('Claim not found');
+      return;
+    }
     console.log('Claiming rewards for delegate:', delegateAddress);
-    setStep(3);
+    await claimAndDelegate({
+      claimId,
+      delegateeAddress: delegateAddress as `0x${string}`,
+      claim,
+    });
+    console.log('done');
+    // setStep(3);
   }
 
   function handleClose() {
