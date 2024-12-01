@@ -2,7 +2,7 @@ import type { Claim } from '@/app/api/claims/route';
 import { getPublicClientForChain } from '@/lib/getPublicClientForChain';
 import { useMutation } from '@tanstack/react-query';
 import { parse as uuidParse } from 'uuid';
-import { parseSignature, toHex } from 'viem';
+import { decodeErrorResult, parseSignature, toHex } from 'viem';
 import { useWalletClient } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
@@ -86,12 +86,12 @@ export const useContractClaimAndDelegate = () => {
       const parsedClaimId = toHex(uuidParse(claim.uuid));
       const value = BigInt(claim.claimFee);
 
-      return await walletClient.writeContract({
+      const { request } = await publicClient.simulateContract({
         address: hedgeyContractAddresses[chainId],
         abi: ClaimCampaignsAbi,
         functionName: 'claimAndDelegate',
-        chainId,
         value,
+        account: walletClient.account,
         args: [
           parsedClaimId,
           claim.proof,
@@ -100,6 +100,22 @@ export const useContractClaimAndDelegate = () => {
           delegationSignature,
         ],
       });
+      const txHash = await walletClient.writeContract(request);
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+      });
+
+      if (receipt.status !== 'success') {
+        const callData = await publicClient.getTransaction({
+          hash: txHash,
+        });
+        const error = decodeErrorResult({
+          data: callData.input,
+        });
+        console.log(receipt);
+        throw new Error('Transaction failed');
+      }
     },
   });
 };
