@@ -1,13 +1,8 @@
 import type { Claim } from '@/app/api/claims/route';
 import { useMutation } from '@tanstack/react-query';
 import { parse as uuidParse } from 'uuid';
-import { parseSignature, toHex } from 'viem';
-import {
-  useAccount,
-  useReadContract,
-  useSignTypedData,
-  useWriteContract,
-} from 'wagmi';
+import { http, createPublicClient, parseSignature, toHex } from 'viem';
+import { useAccount, useSignTypedData, useWriteContract } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
 import { hedgeyContractAddresses } from '../../config/contracts/addresses';
@@ -32,42 +27,42 @@ export const useContractClaimAndDelegate = () => {
   const { writeContractAsync } = useWriteContract();
   const { signTypedDataAsync } = useSignTypedData();
   const { address } = useAccount();
-  const {
-    data: nonce,
-    error,
-    failureCount,
-  } = useReadContract({
-    address: hedgeyContractAddresses[chainId],
-    abi: ClaimCampaignsAbi,
-    functionName: 'nonces',
-    args: [address],
-    chainId,
-    query: { enabled: Boolean(address), retry: false },
-  });
-  console.log('nonce', nonce, error, failureCount);
 
   return useMutation({
     mutationKey: ['contract-claim-and-delegate'],
     mutationFn: async ({
-      claimId,
       delegateeAddress,
       claim,
     }: {
       delegateeAddress: `0x${string}`;
-      claimId: string;
       claim: Claim;
     }) => {
       if (!claim.proof) {
         throw new Error('Proof is required');
       }
 
-      // if (!nonce) {
-      //   throw new Error('Nonce is required');
-      // }
+      if (!address) {
+        throw new Error('Address is required');
+      }
 
-      // TODO: Obtain the nonce for the current user
-      const nonce = BigInt(0);
-      console.log('nonce', nonce);
+      console.log(claim);
+
+      let nonce = BigInt(0);
+      try {
+        // TODO: Nonce is not being fetched from contract somehow
+        const publicClient = createPublicClient({
+          transport: http(),
+          chain: sepolia,
+        });
+        nonce = await publicClient.readContract({
+          address: hedgeyContractAddresses[chainId],
+          abi: ClaimCampaignsAbi,
+          functionName: 'nonces',
+          args: [address],
+        });
+      } catch (e) {
+        console.error('Failed to fetch nonce', e);
+      }
 
       // Obtain signature for the delegation according to
       // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
@@ -93,10 +88,8 @@ export const useContractClaimAndDelegate = () => {
       };
 
       // Perform the contract call
-      const parsedClaimId = toHex(uuidParse(claimId));
-
-      const claimFee = '223000000000000';
-      const value = BigInt(claimFee);
+      const parsedClaimId = toHex(uuidParse(claim.uuid));
+      const value = BigInt(claim.claimFee);
 
       return await writeContractAsync({
         address: hedgeyContractAddresses[chainId],

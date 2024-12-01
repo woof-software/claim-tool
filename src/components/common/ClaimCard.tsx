@@ -25,12 +25,10 @@ const FormSchema = z.object({
   }),
 });
 
-const claimId = 'e23db1a6-3a9b-48bf-8a06-bb39c2298435';
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const [delegateAddress, setDelegateAddress] = useState('');
-  console.log(grant);
   const { claim } = useGetClaim({
     uuid: grant.id,
   });
@@ -55,7 +53,6 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     }
     console.log('Claiming rewards for delegate:', delegateAddress);
     await claimAndDelegate({
-      claimId,
       delegateeAddress: delegateAddress as `0x${string}`,
       claim,
     });

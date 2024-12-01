@@ -28,6 +28,7 @@ export type Claim = {
   canClaim: boolean;
   proof?: `0x${string}`[];
   amount: string;
+  claimFee: string;
 };
 
 export type ResponseData = {
@@ -52,6 +53,7 @@ export const generateMockClaim = (size = 5): Claim => {
     canClaim,
     proof,
     amount,
+    claimFee: '100000000000000000',
   };
 };
 
@@ -87,13 +89,21 @@ export async function GET(
   // const claim = generateMockClaim();
   // https://api.hedgey.finance/token-claims/proof/{uuid}/{address}
   // console.log(`Calling Hedgey API for uuid: ${uuid} and address: ${address}`);
-  const claim = await fetch(
-    `https://api.hedgey.finance/token-claims/proof/${uuid}/${address}`,
-  ).then((res) => res.json());
+  const [claim, claimInfo] = await Promise.all([
+    fetch(
+      `https://api.hedgey.finance/token-claims/proof/${uuid}/${address}`,
+    ).then((res) => res.json()),
+    fetch(`https://api.hedgey.finance/token-claims/info/${uuid}`).then((res) =>
+      res.json(),
+    ),
+  ]);
 
-  console.log(claim);
+  const result = {
+    ...claim,
+    claimFee: claimInfo.claimFee,
+  };
 
-  return new Response(JSON.stringify({ data: claim }), {
+  return new Response(JSON.stringify({ data: result }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
