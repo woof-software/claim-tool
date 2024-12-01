@@ -1,6 +1,7 @@
 'use client';
 
 import ConnectButton from '@/components/auth/ConnectButton';
+import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from './common/images/Logo';
@@ -10,10 +11,12 @@ const links = [
   {
     title: 'Grants',
     href: '/grants',
+    isExternal: false,
   },
   {
     title: 'Delegates',
-    href: '/delegates',
+    href: 'https://vote.optimism.io/delegates',
+    isExternal: true,
   },
 ];
 
@@ -26,20 +29,30 @@ const Header = () => {
         <Link href="/">
           <Logo />
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {links.map((link) => (
             <Button
-              className={`h-full rounded-none py-6 ${
+              className={`h-full rounded-none py-6 group relative ${
                 pathname === link.href
                   ? 'border-b-4 border-secondary-foreground'
-                  : 'hover:border-b-4 hover:border-secondary-foreground'
+                  : 'before:absolute before:bottom-0 before:left-0 before:w-full before:h-1 before:bg-secondary-foreground before:transform before:scale-x-0 before:origin-right hover:before:scale-x-100 hover:before:origin-left before:transition-transform before:duration-300 before:ease-out'
               }`}
               variant={null}
               asChild
               key={link.href}
             >
-              <Link className="font-semibold text-xl" href={link.href}>
+              <Link
+                className="flex items-center font-semibold text-xl"
+                href={link.href}
+                target={link.isExternal ? '_blank' : '_self'}
+              >
                 {link.title}
+                {link.isExternal && (
+                  <RiArrowRightUpLine
+                    className="ml-1 w-6 h-6"
+                    aria-hidden="true"
+                  />
+                )}
               </Link>
             </Button>
           ))}

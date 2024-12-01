@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextRequest } from 'next/server';
 
 // Get claims data by reading from the localy available CSV
 // https://api.hedgey.finance/token-claims/proof/{uuid}/{address}
@@ -45,7 +45,7 @@ export const generateMockClaim = (size = 5): Claim => {
         '0xbf3ee7814439a23ac477953252877c633372fe8c7fde8c0d2ece57a4eca3904f',
         '0x5db1bea240bf7d6de115167e18e2d88e070e79e859a326b6bf7b4e21947a8302',
       ] as `0x${string}`[]);
-  const amount = '1000000000000000000';
+  const amount = canClaim ? '1000000000000000000' : '0';
 
   return {
     address: '0x123',
@@ -57,33 +57,17 @@ export const generateMockClaim = (size = 5): Claim => {
   };
 };
 
-export async function GET(
-  request: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
-) {
-  if (!request.url) {
-    return new Response(JSON.stringify({ error: 'url is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const address = searchParams.get('address');
   const uuid = searchParams.get('uuid');
-  // get wallet address from search params
+
   if (!address) {
-    return new Response(JSON.stringify({ error: 'address is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ error: 'address is required' }, { status: 400 });
   }
 
   if (!uuid) {
-    return new Response(JSON.stringify({ error: 'uuid is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ error: 'uuid is required' }, { status: 400 });
   }
 
   // const claim = generateMockClaim();

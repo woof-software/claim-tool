@@ -18,20 +18,22 @@ export default function ClientLayout({
   const showSignaturePrompt = isConnected && !isSessionLoading && !session;
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="mx-auto max-w-5xl">
-        {isConnecting || isSessionLoading ? (
-          <div className="flex justify-center items-center h-screen">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        ) : showSignaturePrompt ? (
-          <SignMessage />
-        ) : (
-          children
-        )}
-      </div>
+      <main className="flex-grow py-20">
+        <div className="mx-auto max-w-5xl">
+          {isConnecting || isSessionLoading ? (
+            <div className="flex justify-center items-center h-[calc(100vh-5rem)]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : showSignaturePrompt ? (
+            <SignMessage />
+          ) : (
+            children
+          )}
+        </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }

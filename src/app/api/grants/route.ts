@@ -1,15 +1,11 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextRequest } from 'next/server';
 
 export type GrantClaimRow = {
   claimUid: string;
   grantTitle: string;
   grantDescription: string;
-};
-
-export type ResponseData = {
-  data: GrantClaimRow[];
 };
 
 const generateRowsFromCsv = (csv: string) => {
@@ -35,41 +31,26 @@ const parseCsvFile = (csv: string) => {
   return { headers, data: grantClaimRows };
 };
 
-export const getGrantsCsv = async () => {
-  // Find all CSV files in the public/data directory
-
+async function getGrantsCsv() {
   const files = await fs.readdir(path.join(process.cwd(), 'public/data'));
-  console.log(files);
-
-  // Filter out CSV files
   const csvFiles = files.filter((file) => file.endsWith('.csv'));
 
-  // Read all CSVs from the public/data directory
   const data = await Promise.all(
     csvFiles.map(async (file) => {
       const response = await fs.readFile(
         path.join(process.cwd(), `public/data/${file}`),
       );
-      // For every CSV, parse it into an array of objects
       return parseCsvFile(response.toString());
     }),
   );
 
-  // Merge all data into a single object, one row of headers and all data
   const headers = data[0].headers;
   const allData = data.flatMap((csv) => csv.data);
 
   return { headers, data: allData };
-};
+}
 
-export async function GET(
-  request: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
-) {
+export async function GET(request: NextRequest) {
   const grants = await getGrantsCsv();
-
-  return new Response(JSON.stringify({ data: grants.data }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return Response.json({ data: grants.data });
 }
