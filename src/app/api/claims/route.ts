@@ -35,7 +35,7 @@ export type ResponseData = {
   data: Claim;
 };
 
-export const generateMockClaim = (size = 5): Claim => {
+export const generateMockClaim = (): Claim => {
   const canClaim = Math.random() > 0.5;
   const proof = canClaim
     ? undefined

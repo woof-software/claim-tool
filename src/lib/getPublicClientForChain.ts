@@ -16,8 +16,8 @@ const getChainForChainId = (chainId: number) => {
   }
 };
 
-const getRpcUrlForChain = (chain: Chain) => {
-  switch (chain.id) {
+const getRpcUrlForChain = (chainId: number) => {
+  switch (chainId) {
     case mainnet.id:
       return 'https://eth.drpc.org';
     case sepolia.id:
@@ -27,14 +27,16 @@ const getRpcUrlForChain = (chain: Chain) => {
     case optimismSepolia.id:
       return 'https://sepolia.optimism.io';
     default:
-      throw new Error(`Unsupported chain: ${chain.id}`);
+      throw new Error(`Unsupported chain: ${chainId}`);
   }
 };
 
 export const getPublicClientForChain = (chainId: number) => {
   const chain = getChainForChainId(chainId);
+  const rpcUrl = getRpcUrlForChain(chainId);
+
   return createPublicClient({
-    transport: http(getRpcUrlForChain(chain)),
+    transport: http(rpcUrl),
     chain,
   });
 };
