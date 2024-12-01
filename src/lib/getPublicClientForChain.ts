@@ -1,6 +1,21 @@
 import { http, type Chain, createPublicClient } from 'viem';
 import { mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
 
+const getChainForChainId = (chainId: number) => {
+  switch (chainId) {
+    case mainnet.id:
+      return mainnet;
+    case sepolia.id:
+      return sepolia;
+    case optimism.id:
+      return optimism;
+    case optimismSepolia.id:
+      return optimismSepolia;
+    default:
+      throw new Error(`Unsupported chain: ${chainId}`);
+  }
+};
+
 const getRpcUrlForChain = (chain: Chain) => {
   switch (chain.id) {
     case mainnet.id:
@@ -16,7 +31,8 @@ const getRpcUrlForChain = (chain: Chain) => {
   }
 };
 
-export const getPublicClientForChain = (chain: Chain) => {
+export const getPublicClientForChain = (chainId: number) => {
+  const chain = getChainForChainId(chainId);
   return createPublicClient({
     transport: http(getRpcUrlForChain(chain)),
     chain,

@@ -24,7 +24,6 @@ const delegationTypes = {
 } as const;
 
 export const useContractClaimAndDelegate = () => {
-  const chainId = sepolia.id;
   const { data: walletClient } = useWalletClient();
 
   return useMutation({
@@ -44,6 +43,7 @@ export const useContractClaimAndDelegate = () => {
         throw new Error('Wallet client is required');
       }
 
+      const chainId = await walletClient.getChainId();
       const address = walletClient.account.address;
 
       if (!address) {
@@ -51,7 +51,7 @@ export const useContractClaimAndDelegate = () => {
       }
 
       // Get nonce for the currrent address
-      const publicClient = getPublicClientForChain(sepolia);
+      const publicClient = getPublicClientForChain(chainId);
       const nonce = await publicClient.readContract({
         address: hedgeyContractAddresses[chainId],
         abi: ClaimCampaignsAbi,
@@ -106,16 +106,7 @@ export const useContractClaimAndDelegate = () => {
         hash: txHash,
       });
 
-      if (receipt.status !== 'success') {
-        const callData = await publicClient.getTransaction({
-          hash: txHash,
-        });
-        const error = decodeErrorResult({
-          data: callData.input,
-        });
-        console.log(receipt);
-        throw new Error('Transaction failed');
-      }
+      return receipt;
     },
   });
 };
