@@ -97,7 +97,11 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
               </div>
             </CardContent>
             <CardFooter className="py-0">
-              <Button type="submit" variant="destructive">
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={!form.formState.isValid}
+              >
                 Delegate
               </Button>
             </CardFooter>
