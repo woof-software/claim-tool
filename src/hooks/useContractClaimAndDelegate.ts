@@ -1,8 +1,9 @@
 import type { Claim } from '@/app/api/claims/route';
+import { getPublicClientForChain } from '@/lib/getPublicClientForChain';
 import { useMutation } from '@tanstack/react-query';
 import { parse as uuidParse } from 'uuid';
-import { http, createPublicClient, parseSignature, toHex } from 'viem';
-import { useAccount, useSignTypedData, useWriteContract } from 'wagmi';
+import { parseSignature, toHex } from 'viem';
+import { useWalletClient } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
 import { hedgeyContractAddresses } from '../../config/contracts/addresses';
@@ -24,9 +25,7 @@ const delegationTypes = {
 
 export const useContractClaimAndDelegate = () => {
   const chainId = sepolia.id;
-  const { writeContractAsync } = useWriteContract();
-  const { signTypedDataAsync } = useSignTypedData();
-  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   return useMutation({
     mutationKey: ['contract-claim-and-delegate'],
@@ -41,34 +40,30 @@ export const useContractClaimAndDelegate = () => {
         throw new Error('Proof is required');
       }
 
+      if (!walletClient) {
+        throw new Error('Wallet client is required');
+      }
+
+      const address = walletClient.account.address;
+
       if (!address) {
         throw new Error('Address is required');
       }
 
-      console.log(claim);
-
-      let nonce = BigInt(0);
-      try {
-        // TODO: Nonce is not being fetched from contract somehow
-        const publicClient = createPublicClient({
-          transport: http(),
-          chain: sepolia,
-        });
-        nonce = await publicClient.readContract({
-          address: hedgeyContractAddresses[chainId],
-          abi: ClaimCampaignsAbi,
-          functionName: 'nonces',
-          args: [address],
-        });
-      } catch (e) {
-        console.error('Failed to fetch nonce', e);
-      }
+      // Get nonce for the currrent address
+      const publicClient = getPublicClientForChain(sepolia);
+      const nonce = await publicClient.readContract({
+        address: hedgeyContractAddresses[chainId],
+        abi: ClaimCampaignsAbi,
+        functionName: 'nonces',
+        args: [address],
+      });
 
       // Obtain signature for the delegation according to
       // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
       const expiry =
         BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60 * 24 * 7);
-      const signature = await signTypedDataAsync({
+      const signature = await walletClient.signTypedData({
         domain: getClaimDomain('Claim', chainId),
         types: delegationTypes,
         message: {
@@ -91,7 +86,7 @@ export const useContractClaimAndDelegate = () => {
       const parsedClaimId = toHex(uuidParse(claim.uuid));
       const value = BigInt(claim.claimFee);
 
-      return await writeContractAsync({
+      return await walletClient.writeContract({
         address: hedgeyContractAddresses[chainId],
         abi: ClaimCampaignsAbi,
         functionName: 'claimAndDelegate',
