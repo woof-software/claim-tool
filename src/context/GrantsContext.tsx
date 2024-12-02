@@ -44,6 +44,17 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const grants: Grant[] = [
     {
       id: 'e23db1a6-3a9b-48bf-8a06-bb39c2298435',
+      title: 'Demo Grant',
+      description: 'Claim your PLBR here',
+      date: new Date('2024-10-01'),
+      delegateTo: '0x01',
+      latestClaim: '0x00',
+      claimed: 138571.8,
+      grantAmount: 250000.0,
+      canClaim: true,
+    },
+    {
+      id: '1',
       title: 'Party Protocol',
       description:
         'The Party Protocol is an open-source protocol for group coordination. It provides flexible and powerful primitives for creating a shared smart contract account governed by a group of people, big or small. Party.app is the flagship UI / app built on top. It allows groups to form a small group wallet, and large on-chain DAO, or anything in-between. Party.app has built-in functionality for crowdfunding, governance, using apps via wallet connect, buying & selling NFTs, trading tokens, chatting, and much more.',
@@ -52,7 +63,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       latestClaim: '0x00',
       claimed: 138571.8,
       grantAmount: 250000.0,
-      canClaim: true,
+      canClaim: false,
     },
     {
       id: '2',
@@ -76,7 +87,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       latestClaim: '0x02',
       claimed: 50000.0,
       grantAmount: 200000.0,
-      canClaim: true,
+      canClaim: false,
     },
     {
       id: '4',
