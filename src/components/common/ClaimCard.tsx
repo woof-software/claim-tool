@@ -1,10 +1,17 @@
 import type { Grant } from '@/context/GrantsContext';
+import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
+import { useGetClaim } from '@/hooks/useGetClaim';
+import { useToast } from '@/hooks/useToast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+} from 'viem';
 import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter } from '../ui/card';
@@ -29,7 +36,13 @@ const FormSchema = z.object({
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const [step, setStep] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
   const [delegateAddress, setDelegateAddress] = useState('');
+  const { claim } = useGetClaim({
+    uuid: grant.id,
+  });
+  const { mutateAsync: claimAndDelegate, isPending } =
+    useContractClaimAndDelegate();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -43,9 +56,44 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     setStep(2);
   }
 
-  function handleClaim() {
-    console.log('Claiming rewards for delegate:', delegateAddress);
-    setStep(3);
+  async function handleClaim() {
+    if (!claim) {
+      toast({
+        title: 'Error',
+        description: 'Claim not found',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      await claimAndDelegate({
+        delegateeAddress: delegateAddress as `0x${string}`,
+        claim,
+      });
+      toast({
+        title: 'Success',
+        description: 'Rewards claimed successfully',
+      });
+      setStep(3);
+    } catch (error) {
+      // @ts-expect-error this error is spreadable
+      console.error('Error claiming rewards:', { ...error });
+      if (error instanceof ContractFunctionExecutionError) {
+        if (error.cause instanceof ContractFunctionRevertedError) {
+          toast({
+            title: 'Contract error',
+            description: error.cause.reason,
+            variant: 'destructive',
+          });
+        }
+      } else {
+        toast({
+          title: 'Contract error',
+          description: 'An error occurred while claiming rewards',
+          variant: 'destructive',
+        });
+      }
+    }
   }
 
   function handleClose() {
@@ -94,7 +142,11 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
               </div>
             </CardContent>
             <CardFooter className="py-0">
-              <Button type="submit" variant="destructive">
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={!form.formState.isValid}
+              >
                 Delegate
               </Button>
             </CardFooter>
@@ -108,7 +160,11 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
             </p>
           </CardContent>
           <CardFooter className="py-0">
-            <Button onClick={handleClaim} variant="destructive">
+            <Button
+              onClick={handleClaim}
+              variant="destructive"
+              disabled={isPending}
+            >
               Claim
             </Button>
           </CardFooter>
