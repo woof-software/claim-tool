@@ -1,7 +1,7 @@
 import { http, type Chain, createPublicClient } from 'viem';
 import { mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
 
-const getChainForChainId = (chainId: number) => {
+export const getChainForChainId = (chainId: number) => {
   switch (chainId) {
     case mainnet.id:
       return mainnet;

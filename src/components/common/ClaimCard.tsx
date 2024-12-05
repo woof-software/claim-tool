@@ -2,6 +2,7 @@ import type { Grant } from '@/context/GrantsContext';
 import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
 import { useGetClaim } from '@/hooks/useGetClaim';
 import { useToast } from '@/hooks/useToast';
+import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
@@ -25,39 +26,49 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
+import { Switch } from '../ui/switch';
 import SuccessCheckmark from './images/SuccessCheckmark';
 
-const FormSchema = z.object({
-  delegateAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-    message: 'Invalid Ethereum address format.',
-  }),
-});
+const FormSchema = z
+  .object({
+    delegateAddress: z.string().optional(),
+    enableDelegate: z.boolean(),
+  })
+  .superRefine(({ enableDelegate, delegateAddress }, refinementCtx) => {
+    console.log('Running super refine', { enableDelegate, delegateAddress });
+    if (enableDelegate && !/^0x[a-fA-F0-9]{40}$/.test(delegateAddress || '')) {
+      return refinementCtx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Invalid Ethereum address',
+        path: ['delegateAddress'],
+      });
+    }
+  });
 
 export default function ClaimCard({ grant }: { grant: Grant }) {
-  const [step, setStep] = useState(1);
   const router = useRouter();
   const { toast } = useToast();
-  const [delegateAddress, setDelegateAddress] = useState('');
   const { claim } = useGetClaim({
     uuid: grant.id,
   });
   const { mutateAsync: claimAndDelegate, isPending } =
     useContractClaimAndDelegate();
 
+  const [step, setStep] = useState<'form' | 'confirmation'>('form');
+  const [txHash, setTxHash] = useState<string>();
+
   // TODO: Enable ENS
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       delegateAddress: '',
+      enableDelegate: true,
     },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    setDelegateAddress(data.delegateAddress);
-    setStep(2);
-  }
-
-  async function handleClaim() {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!claim) {
       toast({
         title: 'Error',
@@ -67,15 +78,18 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
       return;
     }
     try {
-      await claimAndDelegate({
-        delegateeAddress: delegateAddress as `0x${string}`,
+      const receipt = await claimAndDelegate({
+        delegateeAddress: data.enableDelegate
+          ? (data.delegateAddress as `0x${string}`)
+          : undefined,
         claim,
       });
+      setTxHash(receipt.transactionHash);
       toast({
         title: 'Success',
         description: 'Rewards claimed successfully',
       });
-      setStep(3);
+      setStep('confirmation');
     } catch (error) {
       // @ts-expect-error this error is spreadable
       console.error('Error claiming rewards:', { ...error });
@@ -98,90 +112,113 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   }
 
   function handleClose() {
-    console.log('Closing the claim process');
-    router.push('/grants');
+    router.push('/claim');
   }
+
+  const enableDelegate = form.watch('enableDelegate');
 
   return (
     <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
-      {step === 1 ? (
+      {step === 'form' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
-              <p className="text-lg">
-                To claim the milestone, you must appoint a delegate first.
-              </p>
-              <Link
-                className="group flex items-center font-semibold text-lg text-black"
-                href="https://vote.optimism.io/delegates"
-                target="_blank"
-              >
-                View all the delegate profiles
-                <RiArrowRightUpLine
-                  className="ml-1 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                  aria-hidden="true"
-                />
-              </Link>
-              <div className="grid w-full max-w-sm items-center gap-3">
-                <FormField
-                  control={form.control}
-                  name="delegateAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Enter the delegate's address</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="bg-transparent border-neutral-300"
-                          placeholder="0x..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div className="flex justify-between">
+                <p className="text-lg font-semibold">
+                  Opt-in to delegate the awarded token
+                </p>
+                <Switch
+                  checked={enableDelegate}
+                  onCheckedChange={(newEnableDelegate) => {
+                    form.setValue('enableDelegate', newEnableDelegate);
+                    form.trigger('enableDelegate');
+                  }}
+                  color="red"
                 />
               </div>
+              {enableDelegate ? (
+                <>
+                  <div className="grid w-full max-w-sm items-center gap-3">
+                    <FormField
+                      control={form.control}
+                      name="delegateAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-lg font-normal">
+                            Enter the delegate's address
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="bg-transparent border-neutral-300"
+                              placeholder="0x..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <p className="text-sm">
+                    You can visit{' '}
+                    <a
+                      className="font-semibold text-black"
+                      href="https://vote.optimism.io/delegates"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      this page
+                    </a>{' '}
+                    to find the delegate who should represent for you, or
+                    delegate the token to yourself.
+                  </p>
+                </>
+              ) : (
+                <></>
+              )}
             </CardContent>
             <CardFooter className="py-0">
               <Button
                 type="submit"
                 variant="destructive"
-                disabled={!form.formState.isValid}
+                disabled={!form.formState.isValid || isPending}
               >
-                Delegate
+                {enableDelegate ? 'Delegate' : 'Claim'}
               </Button>
             </CardFooter>
           </form>
         </Form>
-      ) : step === 2 ? (
-        <>
-          <CardContent className="space-y-6">
-            <p className="text-lg">
-              Excellent. You are now ready to claim your rewards
-            </p>
-          </CardContent>
-          <CardFooter className="py-0">
-            <Button
-              onClick={handleClaim}
-              variant="destructive"
-              disabled={isPending}
-            >
-              Claim
-            </Button>
-          </CardFooter>
-        </>
-      ) : (
-        <>
-          <CardContent className="p-0 space-y-6 flex flex-col items-center">
-            <p className="text-lg">All done!</p>
-            <SuccessCheckmark />
+      )}
+      {step === 'confirmation' && (
+        <CardContent className="p-0 space-y-6 flex flex-col items-center">
+          <p className="text-lg">All done!</p>
+          <SuccessCheckmark />
+          <div className="flex space-x-2">
             <DialogClose asChild>
-              <Button onClick={handleClose} variant="outline">
-                Close
+              <Button
+                onClick={handleClose}
+                variant="outline"
+                className="w-full"
+              >
+                See my claim history
               </Button>
             </DialogClose>
-          </CardContent>
-        </>
+            {txHash && (
+              <Link
+                target="_blank"
+                href={generateBlockExplorerUrl(grant.chainId, txHash)}
+              >
+                <Button className="w-full group">
+                  View on block explorer{' '}
+                  <RiArrowRightUpLine
+                    className="ml-1 text-white w-4 h-4 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </Link>
+            )}
+          </div>
+        </CardContent>
       )}
     </Card>
   );

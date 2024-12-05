@@ -1,6 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Grant } from '@/context/GrantsContext';
-import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
+import {
+  generateBlockExplorerUrl,
+  getChainForChainId,
+} from '@/lib/getPublicClientForChain';
 import { truncate } from '@/lib/truncate';
 import { cn } from '@/lib/utils';
 import { RiArrowRightUpLine } from '@remixicon/react';
@@ -8,11 +11,17 @@ import { Hexagon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import OPLogo from '../../../public/op.svg';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
 
 const GrantCard = ({
   grant,
@@ -21,6 +30,11 @@ const GrantCard = ({
   grant: Grant;
   isClaimDialogOpen?: boolean;
 }) => {
+  const chainId = useChainId();
+
+  const isCorrectChain = grant.chainId === chainId;
+  const chain = getChainForChainId(grant.chainId);
+
   const [showClaimDialog, setShowClaimDialog] = useState(false);
   const { isConnected } = useAccount();
 
@@ -33,20 +47,61 @@ const GrantCard = ({
       <Card
         className={cn(
           'shadow-none',
-          isClaimDialogOpen && 'border border-neutral-300 cursor-pointer',
+          isClaimDialogOpen && 'border border-neutral-300',
+          isClaimDialogOpen && isCorrectChain && 'cursor-pointer',
         )}
       >
-        {/* TODO: Disable based on chain */}
+        {grant.currentUserCanClaim &&
+          isClaimDialogOpen &&
+          isConnected &&
+          !isCorrectChain && (
+            <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
+              <p className="text-sm">
+                You are eligible to claim this grant on <b>{chain.name}</b>
+              </p>
+            </div>
+          )}
         {grant.currentUserCanClaim && !isClaimDialogOpen && isConnected && (
           <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
-            <p className="text-sm">You are eligible to claim this grant</p>
-            <Button
-              variant="link"
-              className="text-red-500 font-semibold hover:no-underline p-0"
-              onClick={handleClaim}
-            >
-              Claim now
-            </Button>
+            <p className="text-sm">
+              You are eligible to claim this grant
+              {!isCorrectChain && (
+                <span>
+                  {' '}
+                  on <b>{chain.name}</b>
+                </span>
+              )}
+            </p>
+            {isCorrectChain ? (
+              <Button
+                variant="link"
+                className="text-red-500 font-semibold hover:no-underline p-0"
+                onClick={handleClaim}
+              >
+                Claim now
+              </Button>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button
+                        disabled
+                        variant="link"
+                        className="text-red-500 font-semibold hover:no-underline p-0 cursor-not-allowed"
+                      >
+                        Claim now
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs text-black">
+                      Please switch to {chain.name} to claim this grant
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         )}
         <CardContent className="flex flex-col md:flex-row items-start md:items-center gap-8 py-8 px-10">

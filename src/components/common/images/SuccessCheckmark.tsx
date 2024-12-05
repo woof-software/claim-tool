@@ -3,7 +3,10 @@ export default function SuccessCheckmark() {
     <div className="checkmark animate-checkmark">
       {[...Array(6)].map((_, i) => (
         <svg
-          key={_}
+          key={`confetti-${
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+            i
+          }`}
           className={`confetti animate-grow confetti-${i + 1}`}
           height="19"
           viewBox="0 0 19 19"

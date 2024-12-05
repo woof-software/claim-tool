@@ -4,6 +4,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import Image from 'next/image';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
+import { useChainId } from 'wagmi';
 import OPLogo from '../../../public/op.svg';
 import ClaimCard from '../common/ClaimCard';
 import { DaysUntilCard } from '../common/DaysUntilCard';
@@ -25,12 +26,17 @@ export function ClaimDialog({
   const [selectedGrantId, setSelectedGrantId] = useState<string | undefined>(
     grantId,
   );
+  const chainId = useChainId();
 
   const selectedGrant = selectedGrantId
     ? grants.find((grant) => grant.id === selectedGrantId)
     : undefined;
 
   const handleGrantSelect = (id: string) => {
+    const selectedGrant = grants.find((grant) => grant.id === id);
+    if (selectedGrant?.chainId !== chainId) {
+      return;
+    }
     setSelectedGrantId(id);
   };
 
