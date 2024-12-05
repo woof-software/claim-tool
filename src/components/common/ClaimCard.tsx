@@ -44,6 +44,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   const { mutateAsync: claimAndDelegate, isPending } =
     useContractClaimAndDelegate();
 
+  // TODO: Enable ENS
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {

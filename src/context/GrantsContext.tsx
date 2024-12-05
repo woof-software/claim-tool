@@ -1,5 +1,19 @@
+import type { Claim } from '@/app/api/claims/route';
+import {
+  type ClaimHistoryEvent,
+  useClaimHistory,
+} from '@/hooks/useClaimHistory';
+import { useGetCanClaim } from '@/hooks/useGetCanClaim';
+import {
+  type HedgeyCampaign,
+  useGetHedgeyCampaigns,
+} from '@/hooks/useGetHedgeyCampaigns';
+import { getNextTokenReleaseTimestamp } from '@/lib/getNextTokenRelease';
+import { getChainIdByNetworkName } from '@/lib/getPublicClientForChain';
 import type React from 'react';
 import { createContext, useContext, useState } from 'react';
+import { formatUnits } from 'viem';
+import { useAccount } from 'wagmi';
 
 export enum FilterOption {
   Highest = 'Highest',
@@ -14,10 +28,15 @@ export type Grant = {
   description: string;
   date: Date;
   delegateTo: string;
-  latestClaim: string;
+  latestClaimHash: string;
   claimed: number;
   grantAmount: number;
-  canClaim: boolean;
+  chainId: number;
+  proof: Claim & { claimed: boolean };
+  campaign: HedgeyCampaign;
+  currentUserCanClaim: boolean;
+  claimEvents?: ClaimHistoryEvent[];
+  tokenReleasedInDays: number | null;
 };
 
 type GrantsContextType = {
@@ -41,42 +60,99 @@ type GrantsProviderProps = {
 };
 
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
-  const grants: Grant[] = [
+  const grants = [
+    {
+      id: '1ab278f1-252a-4265-b15f-30765f46babc',
+      title: 'Optimism Demo Grant',
+      description: 'For the optimism demo',
+      delegateTo: '0x123',
+    },
     {
       id: '04725f67-1af7-4b4c-9b3e-7f523f5e8cf7',
       title: 'Uniswap Demo Grant',
       description: 'Claim your tokens here',
-      date: new Date('2024-10-01'),
       delegateTo: '0x01',
-      latestClaim: '0x00',
-      claimed: 138571.8,
-      grantAmount: 250000.0,
-      canClaim: true,
     },
     {
       id: 'e23db1a6-3a9b-48bf-8a06-bb39c2298435',
       title: 'Demo Grant',
       description: 'Claim your PLBR here',
-      date: new Date('2024-10-01'),
       delegateTo: '0x01',
-      latestClaim: '0x00',
-      claimed: 138571.8,
-      grantAmount: 250000.0,
-      canClaim: true,
     },
   ];
 
   const [displayCount, setDisplayCount] = useState(10);
 
+  const { address } = useAccount();
+  const campaignIds = grants.map((grant) => grant.id);
+  const { data: hedgeyCampaigns } = useGetHedgeyCampaigns(campaignIds);
+  const { data: proofs } = useGetCanClaim(hedgeyCampaigns ?? []);
+  const { data: claimHistory = {} } = useClaimHistory(address, campaignIds);
+
+  // Map the Hedgey campaigns to the grants, ignore any grants that don't have a corresponding campaign
+  const mappedGrants = grants
+    .map((grant) => {
+      const campaign = hedgeyCampaigns?.find(
+        (campaign) => campaign.id === grant.id,
+      );
+      const proof = proofs?.find((proof) => proof?.uuid === grant.id);
+
+      if (!proof || !campaign) return null;
+
+      const grantAmount = Number(
+        formatUnits(
+          BigInt(campaign.totalAmount || 0),
+          campaign.token?.decimals || 0,
+        ),
+      );
+
+      const claimed = Number(
+        formatUnits(
+          BigInt(Number(campaign.totalAmountClaimed) || 0),
+          campaign.token?.decimals || 0,
+        ),
+      );
+
+      const currentUserCanClaim = proof.canClaim && !proof.claimed;
+      const date = new Date(campaign.createdAt as string);
+      const chainId = getChainIdByNetworkName(campaign.network);
+      const claimEvents = claimHistory[grant.id];
+
+      const latestClaimHash = claimEvents?.[0]?.transactionHash;
+
+      const tokenReleasedInDays = getNextTokenReleaseTimestamp(
+        campaign.claimLockup,
+      )?.daysUntilNextRelease;
+
+      return {
+        ...grant,
+        proof,
+        campaign,
+        claimEvents,
+
+        // Calculated fields
+        grantAmount,
+        claimed,
+        currentUserCanClaim,
+        date,
+        chainId,
+        latestClaimHash,
+        tokenReleasedInDays,
+      };
+    })
+    .filter((grant) => grant !== null) as Grant[];
+
   const loadMore = () => {
     setDisplayCount((prevCount) => Math.min(prevCount + 5, grants.length));
   };
 
+  console.log(mappedGrants);
+
   return (
     <GrantsContext.Provider
       value={{
-        grants,
-        displayedGrants: grants.slice(0, displayCount),
+        grants: mappedGrants,
+        displayedGrants: mappedGrants.slice(0, displayCount),
         loadMore,
       }}
     >

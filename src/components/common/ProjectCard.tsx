@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import type { Grant } from '@/context/GrantsContext';
 import Image from 'next/image';
 import OPLogo from '../../../public/op.svg';
 import ClaimButton from '../ClaimButton';
@@ -11,50 +12,19 @@ interface ProjectCardProps {
   grantIds?: string[];
 }
 
-const ProjectCard = ({
-  projectCount = 1,
-  totalAwarded = 30000,
-  remainingAmount = 2000,
-  grantIds = ['1'],
-}: ProjectCardProps) => {
+const ProjectCard = ({ grant }: { grant: Grant }) => {
   return (
     <Card className="w-[424px] border-black shadow-none bg-transparent">
       <CardContent className="py-8 px-10 space-y-6">
-        <div className="flex items-center justify-between">
-          <p>Awarded project</p>
-          <p className="text-lg font-semibold">{projectCount}</p>
+        <p>Your project</p>
+        <div className="flex items-center">
+          <img
+            className="h-[80px] mr-4"
+            alt="Project logo"
+            src="https://s3-alpha-sig.figma.com/img/685a/d643/05f04d7ff70b568228d7a30162da101b?Expires=1734307200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MVZe8gR3WzACmBfr~-HwRsKwQBr-mj2NLvgijPDeEdVB-d79EOtvxuSO~Ii1f08Ggk8BlBW7AH1PzsYLfTi44cDSOA5tzLuYgdKzsgS7ZED~k9lkCN2BBnVRSNHTuh4PRyY1k~VLPVy8K8rIKHPmpMq9gXFbIYJ06bCRvpgEKISQRR7njpZBiu3KaUThOGS2MnQaC-YtITalqNZEpxPjKHfADnXjX66iA5GZo1wQA5sQATzWIlycdmH0d7JGV~Zg4Q6nUvbCwCstL1Og0z2qA9vcxrez2EvRi8tPK6LIFTGLO-OHmw8v~GjhnPFycRoq8bWDffq0lmB-iZGCSztBsw__"
+          />
+          <p className="text-lg font-semibold">{grant.title}</p>
         </div>
-        <div className="flex items-center justify-between">
-          <p>Total awarded amount</p>
-          <div className="flex items-center gap-2">
-            <Image
-              className="rounded-full flex-shrink-0 flex relative"
-              alt="OP Logo"
-              src={OPLogo}
-              width={24}
-              height={24}
-            />
-            <p className="text-lg font-semibold">
-              {totalAwarded.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <p>Remaining/Unclaimed</p>
-          <div className="flex items-center gap-2">
-            <Image
-              className="rounded-full flex-shrink-0 flex relative"
-              alt="OP Logo"
-              src={OPLogo}
-              width={24}
-              height={24}
-            />
-            <p className="text-lg font-semibold">
-              {remainingAmount.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <ClaimButton grantIds={grantIds} />
       </CardContent>
     </Card>
   );

@@ -2,9 +2,8 @@ import type { Claim } from '@/app/api/claims/route';
 import { getPublicClientForChain } from '@/lib/getPublicClientForChain';
 import { useMutation } from '@tanstack/react-query';
 import { parse as uuidParse } from 'uuid';
-import { decodeErrorResult, parseSignature, toHex } from 'viem';
+import { parseSignature, toHex } from 'viem';
 import { useWalletClient } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
 import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
 import { hedgeyContractAddresses } from '../../config/contracts/addresses';
 
@@ -32,7 +31,7 @@ export const useContractClaimAndDelegate = () => {
       delegateeAddress,
       claim,
     }: {
-      delegateeAddress: `0x${string}`;
+      delegateeAddress?: `0x${string}`;
       claim: Claim;
     }) => {
       if (!claim.proof) {
@@ -59,48 +58,61 @@ export const useContractClaimAndDelegate = () => {
         args: [address],
       });
 
-      // Obtain signature for the delegation according to
-      // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
-      const expiry =
-        BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60 * 24 * 7);
-      const signature = await walletClient.signTypedData({
-        domain: getClaimDomain('Claim', chainId),
-        types: delegationTypes,
-        message: {
-          delegatee: delegateeAddress,
-          expiry,
-          nonce,
-        },
-        primaryType: 'Delegation',
-      });
-      const { r, v, s } = parseSignature(signature);
-      const delegationSignature = {
-        nonce,
-        expiry,
-        v: Number(v),
-        r,
-        s,
-      };
-
-      // Perform the contract call
+      // Prepare contract call variables
       const parsedClaimId = toHex(uuidParse(claim.uuid));
       const value = BigInt(claim.claimFee);
 
-      const { request } = await publicClient.simulateContract({
-        address: hedgeyContractAddresses[chainId],
-        abi: ClaimCampaignsAbi,
-        functionName: 'claimAndDelegate',
-        value,
-        account: walletClient.account,
-        args: [
-          parsedClaimId,
-          claim.proof,
-          BigInt(claim.amount),
-          delegateeAddress,
-          delegationSignature,
-        ],
-      });
-      const txHash = await walletClient.writeContract(request);
+      let txHash: `0x${string}` | undefined;
+      if (delegateeAddress) {
+        // Obtain signature for the delegation according to
+        // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
+        const expiry =
+          BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60 * 24 * 7);
+        const signature = await walletClient.signTypedData({
+          domain: getClaimDomain('Claim', chainId),
+          types: delegationTypes,
+          message: {
+            delegatee: delegateeAddress,
+            expiry,
+            nonce,
+          },
+          primaryType: 'Delegation',
+        });
+        const { r, v, s } = parseSignature(signature);
+        const delegationSignature = {
+          nonce,
+          expiry,
+          v: Number(v),
+          r,
+          s,
+        };
+
+        const { request } = await publicClient.simulateContract({
+          address: hedgeyContractAddresses[chainId],
+          abi: ClaimCampaignsAbi,
+          functionName: 'claimAndDelegate',
+          value,
+          account: walletClient.account,
+          args: [
+            parsedClaimId,
+            claim.proof,
+            BigInt(claim.amount),
+            delegateeAddress,
+            delegationSignature,
+          ],
+        });
+        txHash = await walletClient.writeContract(request);
+      } else {
+        const { request } = await publicClient.simulateContract({
+          address: hedgeyContractAddresses[chainId],
+          abi: ClaimCampaignsAbi,
+          functionName: 'claim',
+          value,
+          account: walletClient.account,
+          args: [parsedClaimId, claim.proof, BigInt(claim.amount)],
+        });
+        txHash = await walletClient.writeContract(request);
+      }
 
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: txHash,

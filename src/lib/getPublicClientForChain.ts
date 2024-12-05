@@ -31,6 +31,26 @@ const getRpcUrlForChain = (chainId: number) => {
   }
 };
 
+export const getChainIdByNetworkName = (networkName: string | null) => {
+  switch (networkName) {
+    case 'mainnet':
+      return mainnet.id;
+    case 'sepolia':
+      return sepolia.id;
+    case 'optimism':
+      return optimism.id;
+    case 'optimismSepolia':
+      return optimismSepolia.id;
+    default:
+      throw new Error(`Unsupported network name: ${networkName}`);
+  }
+};
+
+export const generateBlockExplorerUrl = (chainId: number, hash: string) => {
+  const chain = getChainForChainId(chainId);
+  return `${chain.blockExplorers.default.url}/tx/${hash}`;
+};
+
 export const getPublicClientForChain = (chainId: number) => {
   const chain = getChainForChainId(chainId);
   const rpcUrl = getRpcUrlForChain(chainId);

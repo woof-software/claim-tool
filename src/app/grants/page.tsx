@@ -23,7 +23,7 @@ const Grants = () => {
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
 
   const claimableGrants = useMemo(() => {
-    return grants.filter((grant) => grant.canClaim);
+    return grants.filter((grant) => grant.currentUserCanClaim);
   }, [grants]);
 
   const claimableGrantIds = claimableGrants.map((grant) => grant.id);
@@ -39,10 +39,16 @@ const Grants = () => {
 
     switch (filter) {
       case FilterOption.Highest:
-        filtered.sort((a, b) => b.grantAmount - a.grantAmount);
+        filtered.sort(
+          (a, b) =>
+            Number(b.campaign.totalAmount) - Number(a.campaign.totalAmount),
+        );
         break;
       case FilterOption.Lowest:
-        filtered.sort((a, b) => a.grantAmount - b.grantAmount);
+        filtered.sort(
+          (a, b) =>
+            Number(a.campaign.totalAmount) - Number(b.campaign.totalAmount),
+        );
         break;
       case FilterOption.MostClaimed:
         filtered.sort((a, b) => b.claimed - a.claimed);
