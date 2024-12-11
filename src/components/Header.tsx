@@ -8,17 +8,12 @@ import Logo from './common/images/Logo';
 import { Button } from './ui/button';
 
 const links = [
-  {
-    title: 'Grants',
-    href: '/grants',
-    isExternal: false,
-  },
-  {
-    title: 'Delegates',
-    href: 'https://vote.optimism.io/delegates',
-    isExternal: true,
-  },
-];
+  // {
+  //   title: 'Grants',
+  //   href: '/grants',
+  //   isExternal: false,
+  // },
+] as { title: string; href: string; isExternal: boolean }[];
 
 const Header = () => {
   const pathname = usePathname();

@@ -37,20 +37,6 @@ const ClaimHistory = () => {
                       </p>
                       <Separator orientation="vertical" />
                       <div className="flex items-center gap-2">
-                        <p>Delegate to: </p>
-                        <Link
-                          className="group flex items-center font-semibold text-black"
-                          href="/grants"
-                        >
-                          {grant.delegateTo}{' '}
-                          <RiArrowRightUpLine
-                            className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                            aria-hidden="true"
-                          />
-                        </Link>
-                      </div>
-                      <Separator orientation="vertical" />
-                      <div className="flex items-center gap-2">
                         <p>Remaining: </p>
                         <Image
                           className="rounded-full flex-shrink-0 flex relative"

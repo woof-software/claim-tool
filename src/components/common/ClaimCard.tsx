@@ -1,5 +1,5 @@
 import type { Grant } from '@/context/GrantsContext';
-import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
+import useContractClaim from '@/hooks/useContractClaim';
 import { useGetClaim } from '@/hooks/useGetClaim';
 import { useToast } from '@/hooks/useToast';
 import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
@@ -17,33 +17,10 @@ import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter } from '../ui/card';
 import { DialogClose } from '../ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '../ui/form';
-import { Input } from '../ui/input';
-import { Switch } from '../ui/switch';
+import { Form } from '../ui/form';
 import SuccessCheckmark from './images/SuccessCheckmark';
 
-const FormSchema = z
-  .object({
-    delegateAddress: z.string().optional(),
-    enableDelegate: z.boolean(),
-  })
-  .superRefine(({ enableDelegate, delegateAddress }, refinementCtx) => {
-    console.log('Running super refine', { enableDelegate, delegateAddress });
-    if (enableDelegate && !/^0x[a-fA-F0-9]{40}$/.test(delegateAddress || '')) {
-      return refinementCtx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Invalid Ethereum address',
-        path: ['delegateAddress'],
-      });
-    }
-  });
+const FormSchema = z.object({});
 
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const router = useRouter();
@@ -51,8 +28,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   const { claim } = useGetClaim({
     uuid: grant.id,
   });
-  const { mutateAsync: claimAndDelegate, isPending } =
-    useContractClaimAndDelegate();
+  const { mutateAsync: contractClaim, isPending } = useContractClaim();
 
   const [step, setStep] = useState<'form' | 'confirmation'>('form');
   const [txHash, setTxHash] = useState<string>();
@@ -60,15 +36,12 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   // TODO: Enable ENS
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      delegateAddress: '',
-      enableDelegate: true,
-    },
+    defaultValues: {},
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit() {
     if (!claim) {
       toast({
         title: 'Error',
@@ -78,10 +51,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
       return;
     }
     try {
-      const receipt = await claimAndDelegate({
-        delegateeAddress: data.enableDelegate
-          ? (data.delegateAddress as `0x${string}`)
-          : undefined,
+      const receipt = await contractClaim({
         claim,
       });
       setTxHash(receipt.transactionHash);
@@ -115,8 +85,6 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     router.push('/claim');
   }
 
-  const enableDelegate = form.watch('enableDelegate');
-
   return (
     <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
       {step === 'form' && (
@@ -125,57 +93,9 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
             <CardContent className="space-y-6">
               <div className="flex justify-between">
                 <p className="text-lg font-semibold">
-                  Opt-in to delegate the awarded token
+                  Claim your grant from the OP Citizen Grants Council
                 </p>
-                <Switch
-                  checked={enableDelegate}
-                  onCheckedChange={(newEnableDelegate) => {
-                    form.setValue('enableDelegate', newEnableDelegate);
-                    form.trigger('enableDelegate');
-                  }}
-                  color="red"
-                />
               </div>
-              {enableDelegate ? (
-                <>
-                  <div className="grid w-full max-w-sm items-center gap-3">
-                    <FormField
-                      control={form.control}
-                      name="delegateAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-lg font-normal">
-                            Enter the delegate's address
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              className="bg-transparent border-neutral-300"
-                              placeholder="0x..."
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <p className="text-sm">
-                    You can visit{' '}
-                    <a
-                      className="font-semibold text-black"
-                      href="https://vote.optimism.io/delegates"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      this page
-                    </a>{' '}
-                    to find the delegate who should represent for you, or
-                    delegate the token to yourself.
-                  </p>
-                </>
-              ) : (
-                <></>
-              )}
             </CardContent>
             <CardFooter className="py-0">
               <Button
@@ -183,7 +103,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
                 variant="destructive"
                 disabled={!form.formState.isValid || isPending}
               >
-                {enableDelegate ? 'Delegate' : 'Claim'}
+                Claim
               </Button>
             </CardFooter>
           </form>

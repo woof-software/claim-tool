@@ -4,7 +4,7 @@ import { type ComponentProps, useEffect, useState } from 'react';
 import type { Address } from 'viem';
 import { normalize } from 'viem/ens';
 import { useEnsAvatar, useEnsName } from 'wagmi';
-import opDelegate from '../../public/op-delegate.svg';
+import avatarFallback from '../../public/op-avatar-fallback.svg';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function AvatarENS({
@@ -35,7 +35,12 @@ export function AvatarENS({
     <Avatar {...props}>
       <AvatarImage src={avatar ?? ''} alt={name ?? address} />
       <AvatarFallback>
-        <Image src={opDelegate} alt="OP Delegate" width={44} height={44} />
+        <Image
+          src={avatarFallback}
+          alt="OP Avatar fallback"
+          width={44}
+          height={44}
+        />
       </AvatarFallback>
     </Avatar>
   );
