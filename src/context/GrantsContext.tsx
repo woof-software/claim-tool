@@ -35,7 +35,6 @@ export type Grant = {
   campaign: HedgeyCampaign;
   currentUserCanClaim: boolean;
   claimEvents?: ClaimHistoryEvent[];
-  tokenReleasedInDays: number | null;
 };
 
 type GrantsContextType = {

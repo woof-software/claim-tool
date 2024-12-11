@@ -119,18 +119,6 @@ const GrantCard = ({
                     {grant.date.toLocaleDateString()}
                   </span>
                 </p>
-                {grant.tokenReleasedInDays && (
-                  <>
-                    <Separator orientation="vertical" />
-                    <p>
-                      Token released in:{' '}
-                      <span className="font-semibold text-black">
-                        {grant.tokenReleasedInDays}{' '}
-                        {grant.tokenReleasedInDays > 1 ? 'days' : 'day'}
-                      </span>
-                    </p>
-                  </>
-                )}
                 {grant.latestClaimHash && (
                   <>
                     <Separator orientation="vertical" />

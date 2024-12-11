@@ -1,6 +1,5 @@
 'use client';
 
-import { DaysUntilCard } from '@/components/common/DaysUntilCard';
 import ProjectCard from '@/components/common/ProjectCard';
 import { TransactionCard } from '@/components/common/TransactionCard';
 import { Card, CardContent } from '@/components/ui/card';
