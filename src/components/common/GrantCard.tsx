@@ -119,51 +119,29 @@ const GrantCard = ({
                     {grant.date.toLocaleDateString()}
                   </span>
                 </p>
-                <Separator orientation="vertical" />
-                {grant.tokenReleasedInDays && (
+                {grant.latestClaimHash && (
                   <>
-                    <p>
-                      Token released in:{' '}
-                      <span className="font-semibold text-black">
-                        {grant.tokenReleasedInDays}{' '}
-                        {grant.tokenReleasedInDays > 1 ? 'days' : 'day'}
-                      </span>
-                    </p>
                     <Separator orientation="vertical" />
+                    <div className="flex items-center gap-2">
+                      <p>Latest claim: </p>
+                      <a
+                        target="_blank"
+                        className="group flex items-center font-semibold text-black"
+                        href={generateBlockExplorerUrl(
+                          grant.chainId,
+                          grant.latestClaimHash,
+                        )}
+                        rel="noreferrer"
+                      >
+                        {truncate(grant.latestClaimHash, 11)}{' '}
+                        <RiArrowRightUpLine
+                          className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
+                      </a>
+                    </div>
                   </>
                 )}
-                <div className="flex items-center gap-2">
-                  <p>Delegate to: </p>
-                  <Link
-                    className="group flex items-center font-semibold text-black"
-                    href="/grants"
-                  >
-                    {grant.delegateTo}{' '}
-                    <RiArrowRightUpLine
-                      className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </div>
-                <Separator orientation="vertical" />
-                <div className="flex items-center gap-2">
-                  <p>Latest claim: </p>
-                  <a
-                    target="_blank"
-                    className="group flex items-center font-semibold text-black"
-                    href={generateBlockExplorerUrl(
-                      grant.chainId,
-                      grant.latestClaimHash,
-                    )}
-                    rel="noreferrer"
-                  >
-                    {truncate(grant.latestClaimHash, 11)}{' '}
-                    <RiArrowRightUpLine
-                      className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                      aria-hidden="true"
-                    />
-                  </a>
-                </div>
               </div>
             </div>
           </div>
