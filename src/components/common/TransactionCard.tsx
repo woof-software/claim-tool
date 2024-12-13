@@ -1,12 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import type { ClaimHistoryEvent } from '@/hooks/useClaimHistory';
+import type { HedgeyCampaign } from '@/hooks/useGetHedgeyCampaigns';
 import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
 import { RiArrowRightUpLine } from '@remixicon/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { formatUnits } from 'viem';
-import OPLogo from '../../../public/op.svg';
+import { CurrencySymbol } from './CurrencySymbol';
 
 export const TransactionCard = ({
   date,
@@ -14,7 +14,8 @@ export const TransactionCard = ({
   claimedAmount,
   transactionHash,
   chainId,
-}: ClaimHistoryEvent & { chainId: number }) => {
+  token,
+}: ClaimHistoryEvent & { chainId: number; token: HedgeyCampaign['token'] }) => {
   return (
     <Card className="shadow-none border-none">
       <CardContent className="py-8 px-10 space-y-6">
@@ -25,19 +26,19 @@ export const TransactionCard = ({
             <span className="font-semibold text-black">{milestone}</span>
           </p>
           <Separator orientation="vertical" />
-          <div className="flex items-center gap-2">
-            <Image
-              className="rounded-full flex-shrink-0 flex relative"
-              alt="OP Logo"
-              src={OPLogo}
-              width={24}
-              height={24}
-            />
-            <p>Claimed: </p>
-            <p className="font-semibold text-black">
-              {formatUnits(BigInt(claimedAmount), 18)?.toLocaleString()}
-            </p>
-          </div>
+          {token && (
+            <div className="flex items-center gap-2">
+              <CurrencySymbol token={token} />
+              <p>Claimed: </p>
+              <p className="font-semibold text-black">
+                {formatUnits(
+                  BigInt(claimedAmount),
+                  token.decimals || 18,
+                )?.toLocaleString()}{' '}
+                {token.ticker}
+              </p>
+            </div>
+          )}
           <Separator orientation="vertical" />
           <div className="flex items-center gap-2">
             <p>Transaction: </p>

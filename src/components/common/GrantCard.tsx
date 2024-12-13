@@ -8,11 +8,9 @@ import { truncate } from '@/lib/truncate';
 import { cn } from '@/lib/utils';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import { Hexagon } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAccount, useChainId } from 'wagmi';
-import OPLogo from '../../../public/op.svg';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -22,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip';
+import { CurrencySymbol } from './CurrencySymbol';
 
 const GrantCard = ({
   grant,
@@ -104,7 +103,7 @@ const GrantCard = ({
             )}
           </div>
         )}
-        <CardContent className="flex flex-col md:flex-row items-start md:items-center gap-8 py-8 px-10">
+        <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 flex-grow">
             <Hexagon className="w-10 h-10" />
             <div className="flex flex-col gap-2 max-w-2xl">
@@ -119,32 +118,39 @@ const GrantCard = ({
                     {grant.date.toLocaleDateString()}
                   </span>
                 </p>
-                <Separator orientation="vertical" />
                 {grant.tokenReleasedInDays && (
                   <>
+                    <Separator orientation="vertical" />
                     <p>
-                      Token released in:{' '}
+                      Released in:{' '}
                       <span className="font-semibold text-black">
                         {grant.tokenReleasedInDays}{' '}
                         {grant.tokenReleasedInDays > 1 ? 'days' : 'day'}
                       </span>
                     </p>
-                    <Separator orientation="vertical" />
                   </>
                 )}
-                <div className="flex items-center gap-2">
-                  <p>Delegate to: </p>
-                  <Link
-                    className="group flex items-center font-semibold text-black"
-                    href="/grants"
-                  >
-                    {grant.delegateTo}{' '}
-                    <RiArrowRightUpLine
-                      className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </div>
+                {grant.delegateTo && (
+                  <>
+                    <Separator orientation="vertical" />
+                    <div className="flex items-center gap-2">
+                      <p>Delegate to: </p>
+                      <Link
+                        className="group flex items-center font-semibold text-black"
+                        href={generateBlockExplorerUrl(
+                          grant.chainId,
+                          grant.delegateTo,
+                        )}
+                      >
+                        {grant.delegateTo}{' '}
+                        <RiArrowRightUpLine
+                          className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </div>
+                  </>
+                )}
                 {grant.latestClaimHash && (
                   <>
                     <Separator orientation="vertical" />
@@ -171,17 +177,15 @@ const GrantCard = ({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 font-semibold">
-            <Image
-              className="rounded-full flex-shrink-0 flex relative"
-              alt="OP Logo"
-              src={OPLogo}
-              width={24}
-              height={24}
-            />
-            <span className="text-black">{grant.claimed}</span> /
-            <span className="text-gray-500">{grant.grantAmount}</span>
-          </div>
+          {grant.campaign.token && (
+            <div className="flex items-center gap-2 font-semibold">
+              <CurrencySymbol token={grant.campaign.token} />
+              <span className="text-black">{grant.claimed}</span> /
+              <span className="text-gray-500">
+                {grant.grantAmount} {grant.campaign.token.ticker}
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
       {!isClaimDialogOpen && (

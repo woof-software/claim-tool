@@ -27,7 +27,7 @@ export type Grant = {
   title: string;
   description: string;
   date: Date;
-  delegateTo: string;
+  delegateTo?: string;
   latestClaimHash: string;
   claimed: number;
   grantAmount: number;
@@ -71,13 +71,11 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       id: '04725f67-1af7-4b4c-9b3e-7f523f5e8cf7',
       title: 'Uniswap Demo Grant',
       description: 'Claim your tokens here',
-      delegateTo: '0x01',
     },
     {
       id: 'e23db1a6-3a9b-48bf-8a06-bb39c2298435',
       title: 'Demo Grant',
       description: 'Claim your PLBR here',
-      delegateTo: '0x01',
     },
   ];
 

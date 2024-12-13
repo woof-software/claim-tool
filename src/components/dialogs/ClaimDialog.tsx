@@ -1,12 +1,11 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useGrants } from '@/context/GrantsContext';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import Image from 'next/image';
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { useChainId } from 'wagmi';
-import OPLogo from '../../../public/op.svg';
 import ClaimCard from '../common/ClaimCard';
+import { CurrencySymbol } from '../common/CurrencySymbol';
 import { DaysUntilCard } from '../common/DaysUntilCard';
 import GrantsList from '../common/GrantList';
 import InfoCard from '../common/InfoCard';
@@ -62,14 +61,9 @@ export function ClaimDialog({
                 </span>
                 with
                 <span className="bg-neutral-200 rounded-md p-3 flex items-center gap-2 w-fit">
-                  <Image
-                    className="rounded-full flex-shrink-0 flex relative"
-                    alt="OP Logo"
-                    src={OPLogo}
-                    width={24}
-                    height={24}
-                  />
-                  {selectedGrant?.grantAmount}
+                  <CurrencySymbol token={selectedGrant?.campaign.token} />
+                  {selectedGrant?.grantAmount}{' '}
+                  {selectedGrant?.campaign.token?.ticker}
                 </span>
               </h1>
               <div className="pt-14 flex items-start gap-14">

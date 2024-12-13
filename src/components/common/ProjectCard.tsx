@@ -1,16 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Grant } from '@/context/GrantsContext';
-import Image from 'next/image';
-import OPLogo from '../../../public/op.svg';
-import ClaimButton from '../ClaimButton';
-
-interface ProjectCardProps {
-  title?: string;
-  projectCount?: number;
-  totalAwarded?: number;
-  remainingAmount?: number;
-  grantIds?: string[];
-}
 
 const ProjectCard = ({ grant }: { grant: Grant }) => {
   return (
