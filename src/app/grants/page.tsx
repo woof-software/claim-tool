@@ -66,8 +66,9 @@ const Grants = () => {
       <div className="flex flex-col gap-6 items-start">
         <h1 className="text-4xl font-bold">Grants</h1>
         <p>
-          Explore all grants from the OP Citizen Grants Council. For grantees,
-          this claiming tool offers a self-serve interface to claim your grant.
+          Explore all grants from the OP Citizen Grants Council and who they've
+          delegated to. For grantees, this claiming tool offers a self-serve
+          interface to claim and delegate your grant.
         </p>
         <div className="flex items-center gap-4">
           <ClaimButton grantIds={claimableGrantIds} />

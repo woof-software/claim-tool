@@ -1,7 +1,7 @@
 # OP Claim Tool
 
 ## Description
-The OP Claim Tool is a web application for Optimism grant recipients to claim awarded tokens. It integrates with Hedgey API for token claims, providing a dashboard for grant metrics and delegation statuses.
+The OP Claim Tool is a web application for Optimism grant recipients to claim and delegate awarded tokens. It integrates with Hedgey API for token claims and Agora API for delegate information, providing a dashboard for grant metrics and delegation statuses.
 
 ## Quick Start
 
