@@ -20,7 +20,7 @@ export default function ClientLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow py-20">
+      <main className="flex-grow py-20 px-3">
         <div className="mx-auto max-w-5xl">
           {isConnecting || isSessionLoading ? (
             <div className="flex justify-center items-center h-[calc(100vh-5rem)]">

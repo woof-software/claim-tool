@@ -21,7 +21,10 @@ const ClaimButton = ({ grantIds }: { grantIds: string[] }) => {
 
   return (
     <>
-      <Button className="p-6" onClick={handleClick} variant="destructive">
+      <Button
+        className="p-6 text-white bg-primaryActionButtonBg hover:bg-initial"
+        onClick={handleClick}
+      >
         {isConnected ? 'Claim now' : 'Connect to claim'}
       </Button>
       <ClaimDialog isOpen={showClaimDialog} setOpen={setShowClaimDialog} />

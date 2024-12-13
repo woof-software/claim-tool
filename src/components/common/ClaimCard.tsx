@@ -26,17 +26,22 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { Switch } from '../ui/switch';
 import SuccessCheckmark from './images/SuccessCheckmark';
+
+import { FEATURES } from '../../../config/features';
+
+const { DELEGATION_REQUIRED } = FEATURES;
 
 const FormSchema = z
   .object({
     delegateAddress: z.string().optional(),
-    enableDelegate: z.boolean(),
+    isDelegationRequired: z.boolean(),
   })
-  .superRefine(({ enableDelegate, delegateAddress }, refinementCtx) => {
-    console.log('Running super refine', { enableDelegate, delegateAddress });
-    if (enableDelegate && !/^0x[a-fA-F0-9]{40}$/.test(delegateAddress || '')) {
+  .superRefine(({ isDelegationRequired, delegateAddress }, refinementCtx) => {
+    if (
+      isDelegationRequired &&
+      !/^0x[a-fA-F0-9]{40}$/.test(delegateAddress || '')
+    ) {
       return refinementCtx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Invalid Ethereum address',
@@ -62,7 +67,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       delegateAddress: '',
-      enableDelegate: true,
+      isDelegationRequired: DELEGATION_REQUIRED,
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -79,7 +84,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     }
     try {
       const receipt = await claimAndDelegate({
-        delegateeAddress: data.enableDelegate
+        delegateeAddress: data.isDelegationRequired
           ? (data.delegateAddress as `0x${string}`)
           : undefined,
         claim,
@@ -115,28 +120,15 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     router.push('/claim');
   }
 
-  const enableDelegate = form.watch('enableDelegate');
+  const isDelegationRequired = form.watch('isDelegationRequired');
 
   return (
     <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
       {step === 'form' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6">
-              <div className="flex justify-between">
-                <p className="text-lg font-semibold">
-                  Opt-in to delegate the awarded token
-                </p>
-                <Switch
-                  checked={enableDelegate}
-                  onCheckedChange={(newEnableDelegate) => {
-                    form.setValue('enableDelegate', newEnableDelegate);
-                    form.trigger('enableDelegate');
-                  }}
-                  color="red"
-                />
-              </div>
-              {enableDelegate ? (
+            {DELEGATION_REQUIRED && (
+              <CardContent className="space-y-6">
                 <>
                   <div className="grid w-full max-w-sm items-center gap-3">
                     <FormField
@@ -173,17 +165,15 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
                     delegate the token to yourself.
                   </p>
                 </>
-              ) : (
-                <></>
-              )}
-            </CardContent>
+              </CardContent>
+            )}
             <CardFooter className="py-0">
               <Button
                 type="submit"
-                variant="destructive"
+                className="bg-primaryActionButtonBg hover:bg-initial"
                 disabled={!form.formState.isValid || isPending}
               >
-                {enableDelegate ? 'Delegate' : 'Claim'}
+                {isDelegationRequired ? 'Delegate and claim' : 'Claim'}
               </Button>
             </CardFooter>
           </form>

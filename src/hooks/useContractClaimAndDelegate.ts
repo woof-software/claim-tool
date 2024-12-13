@@ -6,6 +6,9 @@ import { parseSignature, toHex } from 'viem';
 import { useWalletClient } from 'wagmi';
 import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
 import { hedgeyContractAddresses } from '../../config/contracts/addresses';
+import { FEATURES } from '../../config/features';
+
+const { DELEGATION_ENABLED } = FEATURES;
 
 const getClaimDomain = (name: string, chainId: number) => ({
   name,
@@ -38,6 +41,12 @@ export const useContractClaimAndDelegate = () => {
         throw new Error('Proof is required');
       }
 
+      if (!DELEGATION_ENABLED && delegateeAddress) {
+        throw new Error(
+          'Delegation is not enabled, but delegatee address is provided',
+        );
+      }
+
       if (!walletClient) {
         throw new Error('Wallet client is required');
       }
@@ -49,21 +58,21 @@ export const useContractClaimAndDelegate = () => {
         throw new Error('Address is required');
       }
 
-      // Get nonce for the currrent address
       const publicClient = getPublicClientForChain(chainId);
-      const nonce = await publicClient.readContract({
-        address: hedgeyContractAddresses[chainId],
-        abi: ClaimCampaignsAbi,
-        functionName: 'nonces',
-        args: [address],
-      });
-
       // Prepare contract call variables
       const parsedClaimId = toHex(uuidParse(claim.uuid));
       const value = BigInt(claim.claimFee);
 
       let txHash: `0x${string}` | undefined;
       if (delegateeAddress) {
+        // Get nonce for the currrent address
+        const nonce = await publicClient.readContract({
+          address: hedgeyContractAddresses[chainId],
+          abi: ClaimCampaignsAbi,
+          functionName: 'nonces',
+          args: [address],
+        });
+
         // Obtain signature for the delegation according to
         // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
         const expiry =

@@ -55,14 +55,14 @@ const GrantCard = ({
           isClaimDialogOpen &&
           isConnected &&
           !isCorrectChain && (
-            <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
+            <div className="flex items-center justify-between bg-bgClaimcardHeader px-10 py-2 rounded-t-lg">
               <p className="text-sm">
                 You are eligible to claim this grant on <b>{chain.name}</b>
               </p>
             </div>
           )}
         {grant.currentUserCanClaim && !isClaimDialogOpen && isConnected && (
-          <div className="flex items-center justify-between bg-red-200 px-10 py-2 rounded-t-lg">
+          <div className="flex items-center justify-between bg-bgClaimcardHeader px-10 py-2 rounded-t-lg">
             <p className="text-sm">
               You are eligible to claim this grant
               {!isCorrectChain && (
@@ -75,7 +75,7 @@ const GrantCard = ({
             {isCorrectChain ? (
               <Button
                 variant="link"
-                className="text-red-500 font-semibold hover:no-underline p-0"
+                className="text-primaryAction font-semibold hover:no-underline p-0"
                 onClick={handleClaim}
               >
                 Claim now
@@ -88,7 +88,7 @@ const GrantCard = ({
                       <Button
                         disabled
                         variant="link"
-                        className="text-red-500 font-semibold hover:no-underline p-0 cursor-not-allowed"
+                        className="text-primaryAction font-semibold hover:no-underline p-0 cursor-not-allowed"
                       >
                         Claim now
                       </Button>
@@ -145,25 +145,29 @@ const GrantCard = ({
                     />
                   </Link>
                 </div>
-                <Separator orientation="vertical" />
-                <div className="flex items-center gap-2">
-                  <p>Latest claim: </p>
-                  <a
-                    target="_blank"
-                    className="group flex items-center font-semibold text-black"
-                    href={generateBlockExplorerUrl(
-                      grant.chainId,
-                      grant.latestClaimHash,
-                    )}
-                    rel="noreferrer"
-                  >
-                    {truncate(grant.latestClaimHash, 11)}{' '}
-                    <RiArrowRightUpLine
-                      className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                      aria-hidden="true"
-                    />
-                  </a>
-                </div>
+                {grant.latestClaimHash && (
+                  <>
+                    <Separator orientation="vertical" />
+                    <div className="flex items-center gap-2">
+                      <p>Latest claim: </p>
+                      <a
+                        target="_blank"
+                        className="group flex items-center font-semibold text-black"
+                        href={generateBlockExplorerUrl(
+                          grant.chainId,
+                          grant.latestClaimHash,
+                        )}
+                        rel="noreferrer"
+                      >
+                        {truncate(grant.latestClaimHash, 11)}{' '}
+                        <RiArrowRightUpLine
+                          className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
+                      </a>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
