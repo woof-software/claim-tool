@@ -1,5 +1,5 @@
 import type { Grant } from '@/context/GrantsContext';
-import useContractClaim from '@/hooks/useContractClaim';
+import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
 import { useGetClaim } from '@/hooks/useGetClaim';
 import { useToast } from '@/hooks/useToast';
 import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
@@ -17,10 +17,38 @@ import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter } from '../ui/card';
 import { DialogClose } from '../ui/dialog';
-import { Form } from '../ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
+import { Input } from '../ui/input';
 import SuccessCheckmark from './images/SuccessCheckmark';
 
-const FormSchema = z.object({});
+import { FEATURES } from '../../../config/features';
+
+const { DELEGATION_REQUIRED, DELEGATES_URL } = FEATURES;
+
+const FormSchema = z
+  .object({
+    delegateAddress: z.string().optional(),
+    isDelegationRequired: z.boolean(),
+  })
+  .superRefine(({ isDelegationRequired, delegateAddress }, refinementCtx) => {
+    if (
+      isDelegationRequired &&
+      !/^0x[a-fA-F0-9]{40}$/.test(delegateAddress || '')
+    ) {
+      return refinementCtx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Invalid Ethereum address',
+        path: ['delegateAddress'],
+      });
+    }
+  });
 
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const router = useRouter();
@@ -28,7 +56,8 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   const { claim } = useGetClaim({
     uuid: grant.id,
   });
-  const { mutateAsync: contractClaim, isPending } = useContractClaim();
+  const { mutateAsync: claimAndDelegate, isPending } =
+    useContractClaimAndDelegate();
 
   const [step, setStep] = useState<'form' | 'confirmation'>('form');
   const [txHash, setTxHash] = useState<string>();
@@ -36,12 +65,15 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   // TODO: Enable ENS
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {},
+    defaultValues: {
+      delegateAddress: '',
+      isDelegationRequired: DELEGATION_REQUIRED,
+    },
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
-  async function onSubmit() {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!claim) {
       toast({
         title: 'Error',
@@ -51,7 +83,10 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
       return;
     }
     try {
-      const receipt = await contractClaim({
+      const receipt = await claimAndDelegate({
+        delegateeAddress: data.isDelegationRequired
+          ? (data.delegateAddress as `0x${string}`)
+          : undefined,
         claim,
       });
       setTxHash(receipt.transactionHash);
@@ -85,25 +120,62 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     router.push('/claim');
   }
 
+  const isDelegationRequired = form.watch('isDelegationRequired');
+
   return (
     <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
       {step === 'form' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6">
-              <div className="flex justify-between">
-                <p className="text-lg font-semibold">
-                  Claim your grant from the OP Citizen Grants Council
-                </p>
-              </div>
-            </CardContent>
+            {DELEGATION_REQUIRED && (
+              <CardContent className="space-y-6">
+                <>
+                  <div className="grid w-full max-w-sm items-center gap-3">
+                    <FormField
+                      control={form.control}
+                      name="delegateAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-lg font-normal">
+                            Enter the delegate's address
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="bg-transparent border-neutral-300"
+                              placeholder="0x..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {DELEGATES_URL && (
+                    <p className="text-sm">
+                      You can visit{' '}
+                      <a
+                        className="font-semibold text-black"
+                        href={DELEGATES_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        this page
+                      </a>{' '}
+                      to find the delegate who should represent for you, or
+                      delegate the token to yourself.
+                    </p>
+                  )}
+                </>
+              </CardContent>
+            )}
             <CardFooter className="py-0">
               <Button
                 type="submit"
-                variant="destructive"
+                className="bg-primaryActionButtonBg hover:bg-initial"
                 disabled={!form.formState.isValid || isPending}
               >
-                Claim
+                {isDelegationRequired ? 'Delegate and claim' : 'Claim'}
               </Button>
             </CardFooter>
           </form>

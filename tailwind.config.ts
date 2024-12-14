@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { Config } from 'tailwindcss';
+import { getWhitelabelThemeColors } from './config/features';
 
 const config: Config = {
   darkMode: ['class'],
@@ -36,6 +37,7 @@ const config: Config = {
         rotate: 'rotate 35s linear infinite',
       },
       colors: {
+        ...getWhitelabelThemeColors(),
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

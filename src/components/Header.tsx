@@ -4,22 +4,31 @@ import ConnectButton from '@/components/auth/ConnectButton';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { FEATURES } from '../../config/features';
 import Logo from './common/images/Logo';
 import { Button } from './ui/button';
 
+const { DELEGATION_ENABLED, DELEGATES_URL } = FEATURES;
+
 const links = [
-  // {
-  //   title: 'Grants',
-  //   href: '/grants',
-  //   isExternal: false,
-  // },
-] as { title: string; href: string; isExternal: boolean }[];
+  {
+    title: 'Grants',
+    href: '/grants',
+    isExternal: false,
+  },
+  DELEGATION_ENABLED &&
+    DELEGATES_URL && {
+      title: 'Delegates',
+      href: DELEGATES_URL,
+      isExternal: true,
+    },
+].filter((x) => !!x);
 
 const Header = () => {
   const pathname = usePathname();
 
   return (
-    <div className="h-20 bg-white border-b border-neutral-200">
+    <div className="h-20 bg-white border-b border-neutral-200 px-3">
       <div className="h-full mx-auto max-w-5xl flex items-center justify-between">
         <Link href="/">
           <Logo />
