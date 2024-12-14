@@ -30,7 +30,7 @@ import SuccessCheckmark from './images/SuccessCheckmark';
 
 import { FEATURES } from '../../../config/features';
 
-const { DELEGATION_REQUIRED } = FEATURES;
+const { DELEGATION_REQUIRED, DELEGATES_URL } = FEATURES;
 
 const FormSchema = z
   .object({
@@ -151,19 +151,21 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
                       )}
                     />
                   </div>
-                  <p className="text-sm">
-                    You can visit{' '}
-                    <a
-                      className="font-semibold text-black"
-                      href="https://vote.optimism.io/delegates"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      this page
-                    </a>{' '}
-                    to find the delegate who should represent for you, or
-                    delegate the token to yourself.
-                  </p>
+                  {DELEGATES_URL && (
+                    <p className="text-sm">
+                      You can visit{' '}
+                      <a
+                        className="font-semibold text-black"
+                        href={DELEGATES_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        this page
+                      </a>{' '}
+                      to find the delegate who should represent for you, or
+                      delegate the token to yourself.
+                    </p>
+                  )}
                 </>
               </CardContent>
             )}

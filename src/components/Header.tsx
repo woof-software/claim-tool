@@ -8,7 +8,7 @@ import { FEATURES } from '../../config/features';
 import Logo from './common/images/Logo';
 import { Button } from './ui/button';
 
-const { DELEGATION_ENABLED } = FEATURES;
+const { DELEGATION_ENABLED, DELEGATES_URL } = FEATURES;
 
 const links = [
   {
@@ -16,11 +16,12 @@ const links = [
     href: '/grants',
     isExternal: false,
   },
-  DELEGATION_ENABLED && {
-    title: 'Delegates',
-    href: 'https://vote.optimism.io/delegates',
-    isExternal: true,
-  },
+  DELEGATION_ENABLED &&
+    DELEGATES_URL && {
+      title: 'Delegates',
+      href: DELEGATES_URL,
+      isExternal: true,
+    },
 ].filter((x) => !!x);
 
 const Header = () => {

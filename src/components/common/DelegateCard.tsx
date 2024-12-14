@@ -11,9 +11,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import type { Address } from 'viem';
+import { FEATURES } from '../../../config/features';
 import Mirror from '../../../public/mirror.svg';
 import { AvatarENS, NameENS } from '../Ens';
 import { Button } from '../ui/button';
+
+const { DELEGATES_URL } = FEATURES;
 
 interface DelegateCardProps {
   delegate: Delegate | null;
@@ -100,15 +103,17 @@ const DelegateCard = ({ delegate }: DelegateCardProps) => {
             <Markdown>{delegateStatement}</Markdown>
           </div>
         )}
-        <Button variant="link" className="p-0" asChild>
-          <Link
-            href={`https://vote.optimism.io/delegates/${address}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read more
-          </Link>
-        </Button>
+        {DELEGATES_URL && (
+          <Button variant="link" className="p-0" asChild>
+            <Link
+              href={`${DELEGATES_URL}/${address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read more
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

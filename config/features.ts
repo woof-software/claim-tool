@@ -25,16 +25,19 @@ export const WHITELABEL_ENV = _WHITELABEL_ENV;
 interface Features {
   DELEGATION_REQUIRED: boolean;
   DELEGATION_ENABLED: boolean;
+  DELEGATES_URL?: string;
 }
 
 const featureMatrix: Record<WHITELABEL_ENV, Features> = {
   OPTIMISM: {
     DELEGATION_REQUIRED: false,
     DELEGATION_ENABLED: false,
+    DELEGATES_URL: 'https://vote.optimism.io/delegates',
   },
   ZK_SYNC: {
     DELEGATION_REQUIRED: true,
     DELEGATION_ENABLED: true,
+    DELEGATES_URL: 'https://vote.optimism.io/delegates',
   },
 };
 
