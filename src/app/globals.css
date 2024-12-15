@@ -141,3 +141,8 @@ h1 {
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide the ethereum button in the chain switcher modal */
+button[data-testid="rk-chain-option-1"] {
+  display: none !important;
+}
