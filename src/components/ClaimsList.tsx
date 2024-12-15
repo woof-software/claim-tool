@@ -20,11 +20,7 @@ const ClaimsList = () => {
     return <p>No claims found</p>;
   }
 
-  const onClaim = () => {
-    console.log('claim');
-  };
-
-  console.log('Claim', claim);
+  const onClaim = () => {};
 
   return (
     <div className="flex flex-col gap-4 border border-border rounded-lg p-4">

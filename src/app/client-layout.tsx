@@ -3,8 +3,8 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { SignMessage } from '@/components/auth/SignMessage';
+import { SpinningLoader } from '@/components/common/SpinningLoader';
 import { useSession } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
 import { useAccount } from 'wagmi';
 
 export default function ClientLayout({
@@ -24,7 +24,7 @@ export default function ClientLayout({
         <div className="mx-auto max-w-5xl">
           {isConnecting || isSessionLoading ? (
             <div className="flex justify-center items-center h-[calc(100vh-5rem)]">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <SpinningLoader />
             </div>
           ) : showSignaturePrompt ? (
             <SignMessage />

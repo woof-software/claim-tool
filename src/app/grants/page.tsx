@@ -2,6 +2,7 @@
 
 import ClaimButton from '@/components/ClaimButton';
 import GrantsList from '@/components/common/GrantList';
+import { SpinningLoader } from '@/components/common/SpinningLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,12 +13,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FilterOption, useGrants } from '@/context/GrantsContext';
-import { Search } from 'lucide-react';
+import { Loader, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const Grants = () => {
-  const { displayedGrants, loadMore, grants } = useGrants();
+  const { displayedGrants, loadMore, grants, isLoading } = useGrants();
   const { isConnected } = useAccount();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
@@ -113,7 +114,11 @@ const Grants = () => {
           <span className="text-gray-500">Grant amount</span>
         </p>
       </div>
-      <GrantsList grants={filteredAndSortedGrants} />
+      {isLoading ? (
+        <SpinningLoader />
+      ) : (
+        <GrantsList grants={filteredAndSortedGrants} />
+      )}
       {filteredAndSortedGrants.length < grants.length && (
         <div className="mt-4 flex justify-center">
           <Button onClick={loadMore} variant="outline">

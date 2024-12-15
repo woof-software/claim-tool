@@ -43,6 +43,7 @@ type GrantsContextType = {
   grants: Grant[];
   displayedGrants: Grant[];
   loadMore: () => void;
+  isLoading: boolean;
 };
 
 const GrantsContext = createContext<GrantsContextType | undefined>(undefined);
@@ -83,17 +84,24 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
 
   const { address } = useAccount();
   const campaignIds = grants.map((grant) => grant.id);
-  const { data: hedgeyCampaigns } = useGetHedgeyCampaigns(campaignIds);
-  const { data: proofs } = useGetCanClaim(hedgeyCampaigns ?? []);
-  const { data: claimHistory = {} } = useClaimHistory(
-    address,
-    hedgeyCampaigns
-      ?.filter((campaign) => !!campaign?.id)
-      .map((campaign) => ({
-        grantId: campaign.id as string,
-        chainId: getChainIdByNetworkName(campaign.network),
-      })) || [],
+  const { data: hedgeyCampaigns, isLoading: isLoadingHedgeyCampaigns } =
+    useGetHedgeyCampaigns(campaignIds);
+  const { data: proofs, isLoading: isLoadingProofs } = useGetCanClaim(
+    hedgeyCampaigns ?? [],
   );
+  const { data: claimHistory = {}, isLoading: isLoadingClaimHistory } =
+    useClaimHistory(
+      address,
+      hedgeyCampaigns
+        ?.filter((campaign) => !!campaign?.id)
+        .map((campaign) => ({
+          grantId: campaign.id as string,
+          chainId: getChainIdByNetworkName(campaign.network),
+        })) || [],
+    );
+
+  const isLoading =
+    isLoadingHedgeyCampaigns || isLoadingProofs || isLoadingClaimHistory;
 
   // Map the Hedgey campaigns to the grants, ignore any grants that don't have a corresponding campaign
   const mappedGrants = grants
@@ -162,6 +170,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
         grants: mappedGrants,
         displayedGrants: mappedGrants.slice(0, displayCount),
         loadMore,
+        isLoading,
       }}
     >
       {children}
