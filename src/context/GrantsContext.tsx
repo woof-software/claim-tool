@@ -85,7 +85,15 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const campaignIds = grants.map((grant) => grant.id);
   const { data: hedgeyCampaigns } = useGetHedgeyCampaigns(campaignIds);
   const { data: proofs } = useGetCanClaim(hedgeyCampaigns ?? []);
-  const { data: claimHistory = {} } = useClaimHistory(address, campaignIds);
+  const { data: claimHistory = {} } = useClaimHistory(
+    address,
+    hedgeyCampaigns
+      ?.filter((campaign) => !!campaign?.id)
+      .map((campaign) => ({
+        grantId: campaign.id as string,
+        chainId: getChainIdByNetworkName(campaign.network),
+      })) || [],
+  );
 
   // Map the Hedgey campaigns to the grants, ignore any grants that don't have a corresponding campaign
   const mappedGrants = grants
@@ -115,6 +123,9 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       const date = new Date(campaign.createdAt as string);
       const chainId = getChainIdByNetworkName(campaign.network);
       const claimEvents = claimHistory[grant.id];
+      const latestDelegateTo = claimEvents?.find(
+        (x) => !!x.delegatedTo,
+      )?.delegatedTo;
 
       const latestClaimHash = claimEvents?.[0]?.transactionHash;
 
@@ -136,6 +147,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
         chainId,
         latestClaimHash,
         tokenReleasedInDays,
+        delegateTo: latestDelegateTo,
       };
     })
     .filter((grant) => grant !== null) as Grant[];
@@ -143,8 +155,6 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const loadMore = () => {
     setDisplayCount((prevCount) => Math.min(prevCount + 5, grants.length));
   };
-
-  console.log(mappedGrants);
 
   return (
     <GrantsContext.Provider

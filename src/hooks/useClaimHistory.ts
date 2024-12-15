@@ -1,8 +1,14 @@
-import { type Grant, useGrants } from '@/context/GrantsContext';
+import type { Grant } from '@/context/GrantsContext';
+import { getPublicClientForChain } from '@/lib/getPublicClientForChain';
 import { useQuery } from '@tanstack/react-query';
 import { type ResultOf, graphql } from 'gql.tada';
 import { print } from 'graphql';
+import { parseEventLogs } from 'viem';
+import { TokenAbi } from '../../config/contracts/abis/TokenAbi';
 import { hedgeyGraphqlApiEndpoint } from '../../config/contracts/endpoints';
+import { FEATURES } from '../../config/features';
+
+const { DELEGATION_ENABLED } = FEATURES;
 
 const query = graphql(`
     query GetClaimsForAddress($input: TokenCampaignEventsResolverInput) {
@@ -44,6 +50,7 @@ export interface ClaimHistoryEvent {
   milestone: string;
   transactionHash: string;
   campaignId: string;
+  delegatedTo?: string;
 }
 
 export type ClaimHistory = {
@@ -51,9 +58,13 @@ export type ClaimHistory = {
   events: ClaimHistoryEvent[];
 };
 
-export const useClaimHistory = (userAddress: string, grantIds: string[]) => {
+export const useClaimHistory = (
+  userAddress: string,
+  grants: { grantId: string; chainId: number }[],
+) => {
+  const grantIds = grants.map((grant) => grant.grantId);
   return useQuery({
-    queryKey: ['claim-history', userAddress],
+    queryKey: ['claim-history', userAddress, grantIds],
     enabled: !!userAddress,
     queryFn: async () => {
       const response = await fetch(hedgeyGraphqlApiEndpoint, {
@@ -101,11 +112,12 @@ export const useClaimHistory = (userAddress: string, grantIds: string[]) => {
         return {};
       }
 
-      return grantIds.reduce(
+      const eventsPerClaimId = grantIds.reduce(
         (acc, grantId) => {
           const events = allEvents.filter(
             (event) => event.campaignId === grantId,
           );
+
           if (events.length === 0) {
             return acc;
           }
@@ -114,6 +126,76 @@ export const useClaimHistory = (userAddress: string, grantIds: string[]) => {
           return acc;
         },
         {} as Record<string, ClaimHistoryEvent[]>,
+      );
+
+      if (!DELEGATION_ENABLED) {
+        return eventsPerClaimId;
+      }
+
+      const chainsByGrantId = grants.reduce(
+        (acc, grant) => {
+          acc[grant.grantId] = grant.chainId;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      // Get the delegateTo address for each claim
+      // TODO: Replace with contract call to Token.delegate(address userAddress) contract, once that works
+      return await Promise.all(
+        Object.entries(eventsPerClaimId).map(async ([campaignId, events]) => {
+          if (events.length === 0) {
+            return { campaignId, events: [] };
+          }
+
+          const chainId = chainsByGrantId[campaignId];
+          const publicClient = getPublicClientForChain(chainId);
+          const eventsWithDelegateTo = await Promise.all(
+            events.map(async (event) => {
+              // Get the transaction receipt
+              const receipt = await publicClient.getTransactionReceipt({
+                hash: event.transactionHash as `0x${string}`,
+              });
+
+              // Parse logs and collect the latest DelegateChanged event for the transaction
+              const logs = parseEventLogs({
+                abi: TokenAbi,
+                logs: receipt.logs,
+              });
+              const delegateChangedLogs = logs.filter(
+                (log) => log.eventName === 'DelegateChanged',
+              );
+              if (delegateChangedLogs.length === 0) {
+                return event;
+              }
+              const lastDelegateChangedLog =
+                delegateChangedLogs[delegateChangedLogs.length - 1];
+
+              // Get the address of the delegate
+              const delegateTo = lastDelegateChangedLog?.args?.toDelegate;
+              return {
+                ...event,
+                delegatedTo: delegateTo,
+              };
+            }),
+          );
+          return {
+            campaignId,
+            events: eventsWithDelegateTo,
+          };
+        }),
+      ).then((delegates) =>
+        delegates.reduce(
+          (acc, { campaignId, events }) => {
+            if (!events?.length) {
+              return acc;
+            }
+
+            acc[campaignId] = events;
+            return acc;
+          },
+          {} as Record<string, ClaimHistoryEvent[]>,
+        ),
       );
     },
   });

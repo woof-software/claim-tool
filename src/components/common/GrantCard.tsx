@@ -141,8 +141,9 @@ const GrantCard = ({
                           grant.chainId,
                           grant.delegateTo,
                         )}
+                        target="_blank"
                       >
-                        {grant.delegateTo}{' '}
+                        {truncate(grant.delegateTo, 11)}{' '}
                         <RiArrowRightUpLine
                           className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
                           aria-hidden="true"

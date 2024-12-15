@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useGrants } from '@/context/GrantsContext';
 import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
+import { truncate } from '@/lib/truncate';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import { Hexagon } from 'lucide-react';
 import Image from 'next/image';
@@ -47,8 +48,9 @@ const ClaimHistory = () => {
                                   grant.chainId,
                                   grant.delegateTo,
                                 )}
+                                target="_blank"
                               >
-                                {grant.delegateTo}{' '}
+                                {truncate(grant.delegateTo, 11)}{' '}
                                 <RiArrowRightUpLine
                                   className="ml-1 text-neutral-500 w-4 h-4 opacity-70 transition-transform duration-300 ease-in-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
                                   aria-hidden="true"

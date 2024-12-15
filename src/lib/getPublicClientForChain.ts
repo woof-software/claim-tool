@@ -1,4 +1,4 @@
-import { http, type Chain, createPublicClient } from 'viem';
+import { http, type Chain, createPublicClient, isAddress } from 'viem';
 import { mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
 
 export const getChainForChainId = (chainId: number) => {
@@ -46,9 +46,16 @@ export const getChainIdByNetworkName = (networkName: string | null) => {
   }
 };
 
-export const generateBlockExplorerUrl = (chainId: number, hash: string) => {
+export const generateBlockExplorerUrl = (
+  chainId: number,
+  hashOrAddress: string,
+) => {
   const chain = getChainForChainId(chainId);
-  return `${chain.blockExplorers.default.url}/tx/${hash}`;
+
+  if (isAddress(hashOrAddress)) {
+    return `${chain.blockExplorers.default.url}/address/${hashOrAddress}`;
+  }
+  return `${chain.blockExplorers.default.url}/tx/${hashOrAddress}`;
 };
 
 export const getPublicClientForChain = (chainId: number) => {
