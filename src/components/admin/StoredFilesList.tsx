@@ -30,7 +30,7 @@ export const StoredFilesList = () => {
   }
 
   return (
-    <Table className="bg-white">
+    <Table className="bg-white rounded-lg">
       <TableHeader>
         <TableRow>
           <TableHead>File Name</TableHead>
@@ -40,7 +40,9 @@ export const StoredFilesList = () => {
       <TableBody>
         {data.files.map((file) => (
           <TableRow key={file.name}>
-            <TableCell>{file.name}</TableCell>
+            <TableCell>
+              {file.name?.substring(file.name.indexOf('/') + 1)}
+            </TableCell>
             <TableCell>
               {file.lastModified
                 ? new Date(file.lastModified).toLocaleString()
