@@ -4,6 +4,7 @@ import {
   useClaimHistory,
 } from '@/hooks/useClaimHistory';
 import { useGetCanClaim } from '@/hooks/useGetCanClaim';
+import { useGetGrants } from '@/hooks/useGetGrants';
 import {
   type HedgeyCampaign,
   useGetHedgeyCampaigns,
@@ -61,29 +62,11 @@ type GrantsProviderProps = {
 };
 
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
-  const grants = [
-    {
-      id: '1ab278f1-252a-4265-b15f-30765f46babc',
-      title: 'Optimism Demo Grant',
-      description: 'For the optimism demo',
-      delegateTo: '0x123',
-    },
-    {
-      id: '04725f67-1af7-4b4c-9b3e-7f523f5e8cf7',
-      title: 'Uniswap Demo Grant',
-      description: 'Claim your tokens here',
-    },
-    {
-      id: 'e23db1a6-3a9b-48bf-8a06-bb39c2298435',
-      title: 'Demo Grant',
-      description: 'Claim your PLBR here',
-    },
-  ];
-
   const [displayCount, setDisplayCount] = useState(10);
 
+  const { grants } = useGetGrants();
   const { address } = useAccount();
-  const campaignIds = grants.map((grant) => grant.id);
+  const campaignIds = grants.map((grant) => grant.claimUid);
   const { data: hedgeyCampaigns, isLoading: isLoadingHedgeyCampaigns } =
     useGetHedgeyCampaigns(campaignIds);
   const { data: proofs, isLoading: isLoadingProofs } = useGetCanClaim(
@@ -107,9 +90,9 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const mappedGrants = grants
     .map((grant) => {
       const campaign = hedgeyCampaigns?.find(
-        (campaign) => campaign.id === grant.id,
+        (campaign) => campaign.id === grant.claimUid,
       );
-      const proof = proofs?.find((proof) => proof?.uuid === grant.id);
+      const proof = proofs?.find((proof) => proof?.uuid === grant.claimUid);
 
       if (!proof || !campaign) return null;
 
@@ -130,7 +113,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       const currentUserCanClaim = proof.canClaim && !proof.claimed;
       const date = new Date(campaign.createdAt as string);
       const chainId = getChainIdByNetworkName(campaign.network);
-      const claimEvents = claimHistory[grant.id];
+      const claimEvents = claimHistory[grant.claimUid];
       const latestDelegateTo = claimEvents?.find(
         (x) => !!x.delegatedTo,
       )?.delegatedTo;
@@ -142,7 +125,8 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       )?.daysUntilNextRelease;
 
       return {
-        ...grant,
+        id: grant.claimUid,
+        title: grant.grantTitle,
         proof,
         campaign,
         claimEvents,
