@@ -17,8 +17,30 @@ const getClaimDomain = (name: string, chainId: number) => ({
   verifyingContract: hedgeyContractAddresses[chainId],
 });
 
+const getTokenDomain = (
+  tokenName: string,
+  tokenAddress: `0x${string}`,
+  chainId: number,
+) => ({
+  name: tokenName,
+  version: '1',
+  chainId,
+  verifyingContract: tokenAddress,
+});
+
 const delegationTypes = {
   Delegation: [
+    { name: 'delegatee', type: 'address' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+  ],
+} as const;
+
+const delegatingClaimType = {
+  DelegatingClaim: [
+    { name: 'campaignId', type: 'bytes16' },
+    { name: 'claimer', type: 'address' },
+    { name: 'claimAmount', type: 'uint256' },
     { name: 'delegatee', type: 'address' },
     { name: 'nonce', type: 'uint256' },
     { name: 'expiry', type: 'uint256' },
@@ -31,17 +53,21 @@ export const useContractClaimAndDelegate = () => {
   return useMutation({
     mutationKey: ['contract-claim-and-delegate'],
     mutationFn: async ({
-      delegateeAddress,
+      delegateeAddress: delegatee,
       claim,
+      tokenAddress,
+      tokenName,
     }: {
       delegateeAddress?: `0x${string}`;
       claim: Claim;
+      tokenAddress: `0x${string}`;
+      tokenName: string;
     }) => {
       if (!claim.proof) {
         throw new Error('Proof is required');
       }
 
-      if (!DELEGATION_ENABLED && delegateeAddress) {
+      if (!DELEGATION_ENABLED && delegatee) {
         throw new Error(
           'Delegation is not enabled, but delegatee address is provided',
         );
@@ -64,7 +90,8 @@ export const useContractClaimAndDelegate = () => {
       const value = BigInt(claim.claimFee);
 
       let txHash: `0x${string}` | undefined;
-      if (delegateeAddress) {
+      console.log('delegateeAddress', delegatee, 'claim', claim);
+      if (delegatee) {
         // Get nonce for the currrent address
         const nonce = await publicClient.readContract({
           address: hedgeyContractAddresses[chainId],
@@ -72,23 +99,45 @@ export const useContractClaimAndDelegate = () => {
           functionName: 'nonces',
           args: [address],
         });
-
         // Obtain signature for the delegation according to
         // https://github.com/hedgey-finance/DelegatedTokenClaims/blob/master/test/tests/unlockedDelegatingTests.js#L98
         const expiry =
           BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60 * 24 * 7);
-        const signature = await walletClient.signTypedData({
-          domain: getClaimDomain('Claim', chainId),
+
+        const txSig = await walletClient.signTypedData({
+          domain: getClaimDomain('ClaimCampaigns', chainId),
+          types: delegatingClaimType,
+          message: {
+            campaignId: parsedClaimId,
+            claimer: address,
+            claimAmount: BigInt(claim.amount),
+            delegatee: delegatee,
+            nonce,
+            expiry,
+          },
+          primaryType: 'DelegatingClaim',
+        });
+        const { r: r2, v: v2, s: s2 } = parseSignature(txSig);
+        const txSigFormatted = {
+          nonce,
+          expiry,
+          v: Number(v2),
+          r: r2,
+          s: s2,
+        };
+
+        const delegationSig = await walletClient.signTypedData({
+          domain: getTokenDomain(tokenName, tokenAddress, chainId),
           types: delegationTypes,
           message: {
-            delegatee: delegateeAddress,
+            delegatee,
             expiry,
             nonce,
           },
           primaryType: 'Delegation',
         });
-        const { r, v, s } = parseSignature(signature);
-        const delegationSignature = {
+        const { r, v, s } = parseSignature(delegationSig);
+        const delegationSigFormatted = {
           nonce,
           expiry,
           v: Number(v),
@@ -99,15 +148,17 @@ export const useContractClaimAndDelegate = () => {
         const { request } = await publicClient.simulateContract({
           address: hedgeyContractAddresses[chainId],
           abi: ClaimCampaignsAbi,
-          functionName: 'claimAndDelegate',
+          functionName: 'claimAndDelegateWithSig',
           value,
           account: walletClient.account,
           args: [
             parsedClaimId,
             claim.proof,
+            address,
             BigInt(claim.amount),
-            delegateeAddress,
-            delegationSignature,
+            txSigFormatted,
+            delegatee,
+            delegationSigFormatted,
           ],
         });
         txHash = await walletClient.writeContract(request);

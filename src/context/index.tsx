@@ -3,6 +3,7 @@
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { getChainConfig } from '../../config/features';
@@ -29,6 +30,7 @@ function ContextProvider({ children }: { children: ReactNode }) {
         <RainbowKitProvider>
           <GrantsProvider>{children}</GrantsProvider>
         </RainbowKitProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </WagmiProvider>
   );

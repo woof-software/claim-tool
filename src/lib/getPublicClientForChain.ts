@@ -1,5 +1,11 @@
 import { http, type Chain, createPublicClient, isAddress } from 'viem';
-import { mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
+import {
+  mainnet,
+  optimism,
+  optimismSepolia,
+  sepolia,
+  zksync,
+} from 'viem/chains';
 
 export const getChainForChainId = (chainId: number) => {
   switch (chainId) {
@@ -11,6 +17,8 @@ export const getChainForChainId = (chainId: number) => {
       return optimism;
     case optimismSepolia.id:
       return optimismSepolia;
+    case zksync.id:
+      return zksync;
     default:
       throw new Error(`Unsupported chain: ${chainId}`);
   }
@@ -26,6 +34,8 @@ const getRpcUrlForChain = (chainId: number) => {
       return 'https://mainnet.optimism.io';
     case optimismSepolia.id:
       return 'https://sepolia.optimism.io';
+    case zksync.id:
+      return 'https://mainnet.era.zksync.io';
     default:
       throw new Error(`Unsupported chain: ${chainId}`);
   }
@@ -41,6 +51,8 @@ export const getChainIdByNetworkName = (networkName: string | null) => {
       return optimism.id;
     case 'optimismSepolia':
       return optimismSepolia.id;
+    case 'zksync-era':
+      return zksync.id;
     default:
       throw new Error(`Unsupported network name: ${networkName}`);
   }

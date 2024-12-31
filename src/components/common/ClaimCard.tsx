@@ -82,12 +82,27 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
       });
       return;
     }
+
+    if (
+      !grant.campaign.token ||
+      !grant.campaign.token.address ||
+      !grant.campaign.token.name
+    ) {
+      toast({
+        title: 'Error',
+        description: 'Token not found',
+        variant: 'destructive',
+      });
+      return;
+    }
     try {
       const receipt = await claimAndDelegate({
         delegateeAddress: data.isDelegationRequired
           ? (data.delegateAddress as `0x${string}`)
           : undefined,
         claim,
+        tokenAddress: grant.campaign.token.address as `0x${string}`,
+        tokenName: grant.campaign.token.name,
       });
       setTxHash(receipt.transactionHash);
       toast({
