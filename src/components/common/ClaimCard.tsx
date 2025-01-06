@@ -28,6 +28,7 @@ import {
 import { Input } from '../ui/input';
 import SuccessCheckmark from './images/SuccessCheckmark';
 
+import { Loader2 } from 'lucide-react';
 import { FEATURES } from '../../../config/features';
 
 const { DELEGATION_REQUIRED, DELEGATES_URL } = FEATURES;
@@ -138,12 +139,12 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   const isDelegationRequired = form.watch('isDelegationRequired');
 
   return (
-    <Card className="bg-transparent border border-neutral-300 shadow-none p-10 w-[634px]">
+    <Card className="bg-transparent border border-neutral-300 shadow-none py-10 px-4 w-[634px]">
       {step === 'form' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {DELEGATION_REQUIRED && (
-              <CardContent className="space-y-6">
+            <CardContent className="space-y-6">
+              {DELEGATION_REQUIRED ? (
                 <>
                   <div className="grid w-full max-w-sm items-center gap-3">
                     <FormField
@@ -182,15 +183,29 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
                     </p>
                   )}
                 </>
-              </CardContent>
-            )}
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <p className="text-sm font-bold">Claim the token.</p>
+                  <p className="text-sm">Ready to claim your rewards?</p>
+                </div>
+              )}
+            </CardContent>
             <CardFooter className="py-0">
               <Button
                 type="submit"
                 className="bg-primaryActionButtonBg hover:bg-initial"
                 disabled={!form.formState.isValid || isPending}
               >
-                {isDelegationRequired ? 'Delegate and claim' : 'Claim'}
+                {!isPending &&
+                  (isDelegationRequired ? 'Delegate and claim' : 'Claim')}
+                {isPending && (
+                  <>
+                    <div className="flex pr-2 justify-center items-center py-8">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    </div>
+                    Claiming...
+                  </>
+                )}
               </Button>
             </CardFooter>
           </form>

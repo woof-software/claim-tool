@@ -76,7 +76,7 @@ export const getWhitelabelThemeColors = (): WhitelabelThemeColors => {
       return {
         bgClaimcardHeader: colors.red[200],
         primaryAction: colors.red[500],
-        primaryActionButtonBg: colors.red[900],
+        primaryActionButtonBg: colors.red[600],
       };
     case 'ZK_SYNC':
       return {

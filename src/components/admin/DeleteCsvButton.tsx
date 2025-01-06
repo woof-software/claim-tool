@@ -1,3 +1,4 @@
+import { toast } from '@/hooks/useToast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash } from 'lucide-react';
 import { useAccount, useSignTypedData } from 'wagmi';
@@ -27,15 +28,30 @@ export const DeleteCsvButton = ({
         method: 'DELETE',
         body: JSON.stringify({ fileName, signature, address }),
       });
-
+      if (!response.ok) {
+        const errorResult = await response.json();
+        throw new Error(errorResult.error);
+      }
       return response.json();
     },
     onSuccess: () => {
+      toast({
+        title: 'CSV successfully deleted',
+        variant: 'default',
+      });
       queryClient.invalidateQueries({
         queryKey: ['csv', 'list'],
       });
       queryClient.invalidateQueries({
         queryKey: ['grants'],
+      });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast({
+        title: 'Error deleting file',
+        description: error.message,
+        variant: 'destructive',
       });
     },
   });

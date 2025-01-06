@@ -44,6 +44,10 @@ export const UploadCsvButton = () => {
           const errorResult = await response.json();
           throw new Error(errorResult.error);
         }
+        toast({
+          title: 'CSV successfully added',
+          variant: 'default',
+        });
         return response.json();
       });
     },
