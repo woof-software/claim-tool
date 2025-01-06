@@ -3,6 +3,7 @@ import { verifySignature } from '@/lib/verifySignature';
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { parseCsvContent } from '@/lib/parseCsvContent';
+import { revalidatePath } from 'next/cache';
 import { requiredCsvColumns } from '../../../../config/storage';
 import { deleteFile, listFiles, uploadFile } from '../../../lib/storage';
 
@@ -135,6 +136,11 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
 
   try {
     await addCsvToStorage(file);
+    await Promise.all([
+      revalidatePath('/api/csv'),
+      revalidatePath('/api/grants'),
+      revalidatePath('/grants'),
+    ]);
     return NextResponse.json({ success: true, message: 'File uploaded' });
   } catch (error) {
     return NextResponse.json({
@@ -190,6 +196,11 @@ export const DELETE = async (req: NextRequest, res: NextResponse) => {
     await deleteFile(fileName);
     return NextResponse.json({ success: true, message: 'File deleted' });
   } catch (error) {
+    await Promise.all([
+      revalidatePath('/api/csv'),
+      revalidatePath('/api/grants'),
+      revalidatePath('/grants'),
+    ]);
     return NextResponse.json(
       {
         success: false,
