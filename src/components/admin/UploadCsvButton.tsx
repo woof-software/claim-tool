@@ -54,6 +54,9 @@ export const UploadCsvButton = () => {
       queryClient.invalidateQueries({
         queryKey: ['csv', 'list'],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['grants'],
+      });
     },
     onError: (error) => {
       console.error(error);

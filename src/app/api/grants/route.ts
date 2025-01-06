@@ -1,6 +1,8 @@
 import { parseCsvContent } from '@/lib/parseCsvContent';
 import { getFile, listFiles } from '@/lib/storage';
 
+export const dynamic = 'force-dynamic';
+
 export type GrantClaimRow = {
   claimUid: string;
   grantTitle: string;
@@ -8,7 +10,6 @@ export type GrantClaimRow = {
 };
 
 async function getGrantsFromAllCsvs() {
-  console.log('Getting grants from all CSVs');
   const csvFiles = await listFiles();
   const csvContents = await Promise.all(
     csvFiles
@@ -17,15 +18,12 @@ async function getGrantsFromAllCsvs() {
       .map((fileName) => getFile(fileName)),
   );
 
-  console.log('Parsing CSVs');
   const results: GrantClaimRow[] = [];
   for (const csvContent of csvContents) {
     const rows = parseCsvContent(csvContent);
-    console.log('Parsed', rows.length, 'rows');
-    console.log('Rows:', JSON.stringify(rows));
 
     results.push(
-      ...rows.map((row, index) => {
+      ...rows.map((row) => {
         return {
           claimUid: row.UUID || '<placeholder>',
           grantTitle: row.Title || '<placeholder>',

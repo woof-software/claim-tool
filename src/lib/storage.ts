@@ -82,6 +82,7 @@ export const getFile = async (fileName: string) =>
       });
       stream.on('end', () => {
         // Concat all the chunks in buffer to utf-8 string
+        // @ts-expect-error
         const concatBuffer = Buffer.concat(chunks);
         const content = concatBuffer.toString('utf-8');
         resolve(content);

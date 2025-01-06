@@ -34,6 +34,9 @@ export const DeleteCsvButton = ({
       queryClient.invalidateQueries({
         queryKey: ['csv', 'list'],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['grants'],
+      });
     },
   });
 
