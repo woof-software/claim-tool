@@ -8,4 +8,6 @@ export const whitelistedAddresses = [
   // M
   '0x31f87F1475F81CcfFf6a33A064cAe812BaEEBCC6',
   '0x636DA9bF416B662B5Fedaf67d5937d07A34c6a2D',
+  '0xBfa271C93adD95e6dCeC0CFbb89dC05A867EaB3c',
+  '0x9A73D57BB1fB280C5672A13f655675De25F13b70',
 ] as `0x${string}`[];
