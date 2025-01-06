@@ -7,6 +7,9 @@
       "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
     ]
   },
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
