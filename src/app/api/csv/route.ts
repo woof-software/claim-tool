@@ -3,9 +3,17 @@ import { verifySignature } from '@/lib/verifySignature';
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { parseCsvContent } from '@/lib/parseCsvContent';
+import type { BucketItem } from 'minio';
 import { revalidatePath } from 'next/cache';
 import { requiredCsvColumns } from '../../../../config/storage';
-import { deleteFile, listFiles, uploadFile } from '../../../lib/storage';
+import {
+  deleteFile,
+  getFile,
+  listFiles,
+  uploadFile,
+} from '../../../lib/storage';
+
+export type ApiCsvResult = BucketItem & { contents: Record<string, string>[] };
 
 const verifyCsv = async (file: File) => {
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -47,7 +55,7 @@ const addCsvToStorage = async (file: File) => {
   await uploadFile(file);
 };
 
-export const POST = async (req: NextRequest, res: NextResponse) => {
+export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
 
   const file = formData.get('file');
@@ -147,13 +155,30 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
   }
 };
 
-export const GET = async (req: NextRequest, res: NextResponse) => {
+export const GET = async () => {
   try {
     const files = await listFiles();
+    const filesWithContent = await Promise.all(
+      files.map(async (file) => {
+        // s
+        if (file.name?.endsWith('.csv')) {
+          const fileContents = await getFile(file.name);
+          const contents = parseCsvContent(Buffer.from(fileContents));
+          return {
+            ...file,
+            contents,
+          };
+        }
+        return {
+          ...file,
+          contents: [],
+        };
+      }),
+    );
     return NextResponse.json({
       success: true,
       message: 'Successfully listed files',
-      files,
+      files: filesWithContent,
     });
   } catch (error) {
     return NextResponse.json(
@@ -167,7 +192,7 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
   }
 };
 
-export const DELETE = async (req: NextRequest, res: NextResponse) => {
+export const DELETE = async (req: NextRequest) => {
   try {
     const { signature, fileName, address } = await req.json();
 
