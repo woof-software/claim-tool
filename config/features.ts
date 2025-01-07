@@ -23,6 +23,7 @@ if (!(_WHITELABEL_ENV === 'OPTIMISM' || _WHITELABEL_ENV === 'ZK_SYNC')) {
 export const WHITELABEL_ENV = _WHITELABEL_ENV;
 
 interface Features {
+  APP_NAME: string;
   DELEGATION_REQUIRED: boolean;
   DELEGATION_ENABLED: boolean;
   DELEGATES_URL?: string;
@@ -30,11 +31,13 @@ interface Features {
 
 const featureMatrix: Record<WHITELABEL_ENV, Features> = {
   OPTIMISM: {
+    APP_NAME: 'OP Claim Tool',
     DELEGATION_REQUIRED: false,
     DELEGATION_ENABLED: false,
     DELEGATES_URL: 'https://vote.optimism.io/delegates',
   },
   ZK_SYNC: {
+    APP_NAME: 'ZKsync Claim Tool',
     DELEGATION_REQUIRED: true,
     DELEGATION_ENABLED: true,
     DELEGATES_URL: 'https://vote.optimism.io/delegates',

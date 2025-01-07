@@ -5,9 +5,10 @@ import type { Metadata } from 'next';
 import ClientLayout from './client-layout';
 import { inter, sora } from './fonts';
 import './globals.css';
+import { FEATURES } from '../../config/features';
 
 export const metadata: Metadata = {
-  title: 'OP Claim Tool',
+  title: FEATURES.APP_NAME,
   description: 'Powered by WalletConnect',
 };
 
