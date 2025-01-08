@@ -61,7 +61,10 @@ export const DeleteCsvButton = ({
       {...buttonProps}
       variant={'destructive'}
       disabled={isPending}
-      onClick={() => deleteFile({ fileName })}
+      onClick={(e) => {
+        e.stopPropagation();
+        deleteFile({ fileName });
+      }}
     >
       <Trash />
     </Button>

@@ -22,7 +22,10 @@ export default function RootLayout({
           <ClientLayout>{children}</ClientLayout>
         </ContextProvider>
         <div className="fixed inset-0 w-full h-full -z-10 flex items-center justify-center">
-          <BackgroundImage className="object-cover" />
+          <BackgroundImage
+            className={FEATURES.BG_IMAGE.className}
+            src={FEATURES.BG_IMAGE.src}
+          />
         </div>
         <Toaster />
       </body>

@@ -10,7 +10,7 @@ import { RiArrowRightUpLine } from '@remixicon/react';
 import { Hexagon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useChainId, useChains, useSwitchChain } from 'wagmi';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -30,6 +30,7 @@ const GrantCard = ({
   isClaimDialogOpen?: boolean;
 }) => {
   const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
 
   const isCorrectChain = grant.chainId === chainId;
   const chain = getChainForChainId(grant.chainId);
@@ -80,26 +81,17 @@ const GrantCard = ({
                 Claim now
               </Button>
             ) : (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <Button
-                        disabled
-                        variant="link"
-                        className="text-primaryAction font-semibold hover:no-underline p-0 cursor-not-allowed"
-                      >
-                        Claim now
-                      </Button>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs text-black">
-                      Please switch to {chain.name} to claim this grant
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div>
+                <Button
+                  onClick={() => {
+                    switchChain({ chainId: grant.chainId });
+                  }}
+                  variant="link"
+                  className="text-primaryAction font-semibold hover:no-underline p-0"
+                >
+                  Switch to {chain.name}
+                </Button>
+              </div>
             )}
           </div>
         )}
