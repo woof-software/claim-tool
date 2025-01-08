@@ -1,31 +1,22 @@
-import type { GrantClaimRow, ResponseData } from '@/app/api/grants/route';
+import type { GrantClaimRow } from '@/app/api/grants/route';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+
+type ApiResponse = {
+  data: GrantClaimRow[];
+};
 
 export const useGetGrants = () => {
-  const [grants, setGrants] = useState<GrantClaimRow[]>([]);
-
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<GrantClaimRow[]>({
     queryKey: ['grants'],
     queryFn: async () => {
       const response = await fetch('/api/grants');
-      const data: ResponseData = await response.json();
-
-      console.log('Response data', data);
-
-      return data.data;
+      const result: ApiResponse = await response.json();
+      return result.data;
     },
-    enabled: true,
   });
 
-  useEffect(() => {
-    if (data) {
-      setGrants(data);
-    }
-  }, [data]);
-
   return {
-    grants,
+    grants: data ?? [],
     isLoading,
     isError,
   };

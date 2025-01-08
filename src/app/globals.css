@@ -3,7 +3,72 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter);
+}
+
+h1 {
+  font-family: var(--font-sora);
+}
+
+.confetti {
+  position: absolute;
+}
+
+.confetti-1 {
+  width: 12px;
+  height: 12px;
+  left: 12px;
+  top: 16px;
+  animation-delay: 0.7s;
+}
+
+.confetti-2 {
+  width: 18px;
+  height: 18px;
+  left: 168px;
+  top: 84px;
+  animation-delay: 1.4s;
+}
+
+.confetti-3 {
+  width: 10px;
+  height: 10px;
+  left: 32px;
+  top: 162px;
+  animation-delay: 2.1s;
+}
+
+.confetti-4 {
+  width: 20px;
+  height: 20px;
+  left: 82px;
+  top: -12px;
+  animation-delay: 2.8s;
+}
+
+.confetti-5 {
+  width: 14px;
+  height: 14px;
+  left: 125px;
+  top: 162px;
+  animation-delay: 3.5s;
+}
+
+.confetti-6 {
+  width: 10px;
+  height: 10px;
+  left: 16px;
+  top: 16px;
+  animation-delay: 4.2s;
+}
+
+.checkmark {
+  position: relative;
+  padding: 30px;
+}
+
+.checkmark__back {
+  position: relative;
 }
 
 @layer utilities {
@@ -75,4 +140,9 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide the ethereum button in the chain switcher modal */
+button[data-testid="rk-chain-option-1"] {
+  display: none !important;
 }

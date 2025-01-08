@@ -1,6 +1,7 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { parseCsvContent } from '@/lib/parseCsvContent';
+import { getFile, listFiles } from '@/lib/storage';
+
+export const dynamic = 'force-dynamic';
 
 export type GrantClaimRow = {
   claimUid: string;
@@ -8,68 +9,37 @@ export type GrantClaimRow = {
   grantDescription: string;
 };
 
-export type ResponseData = {
-  data: GrantClaimRow[];
-};
-
-const generateRowsFromCsv = (csv: string) => {
-  const rows = csv.split('\n');
-  return rows.map((row) => row.split(','));
-};
-
-const parseCsvFile = (csv: string) => {
-  const rows = generateRowsFromCsv(csv);
-  const headers = rows[0];
-  const data = rows.slice(1);
-
-  const grantClaimRows: GrantClaimRow[] = [];
-  for (const row of data) {
-    const [claimUid, grantTitle, grantDescription] = row;
-    grantClaimRows.push({
-      claimUid,
-      grantTitle,
-      grantDescription,
-    });
-  }
-
-  return { headers, data: grantClaimRows };
-};
-
-export const getGrantsCsv = async () => {
-  // Find all CSV files in the public/data directory
-
-  const files = await fs.readdir(path.join(process.cwd(), 'public/data'));
-  console.log(files);
-
-  // Filter out CSV files
-  const csvFiles = files.filter((file) => file.endsWith('.csv'));
-
-  // Read all CSVs from the public/data directory
-  const data = await Promise.all(
-    csvFiles.map(async (file) => {
-      const response = await fs.readFile(
-        path.join(process.cwd(), `public/data/${file}`),
-      );
-      // For every CSV, parse it into an array of objects
-      return parseCsvFile(response.toString());
-    }),
+async function getGrantsFromAllCsvs() {
+  const csvFiles = await listFiles();
+  const csvContents = await Promise.all(
+    csvFiles
+      .map((file) => file.name)
+      .filter((fileName): fileName is string => !!fileName)
+      .map((fileName) => getFile(fileName)),
   );
 
-  // Merge all data into a single object, one row of headers and all data
-  const headers = data[0].headers;
-  const allData = data.flatMap((csv) => csv.data);
+  const results: GrantClaimRow[] = [];
+  for (const csvContent of csvContents) {
+    const rows = parseCsvContent(csvContent);
 
-  return { headers, data: allData };
-};
+    results.push(
+      ...rows.map((row) => {
+        return {
+          claimUid: row.UUID || '<placeholder>',
+          grantTitle: row.Title || '<placeholder>',
+          grantDescription: '<placeholder>',
+        };
+      }),
+    );
+  }
+  return results;
+}
 
-export async function GET(
-  request: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
-) {
-  const grants = await getGrantsCsv();
-
-  return new Response(JSON.stringify({ data: grants.data }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+export async function GET() {
+  const grants = await getGrantsFromAllCsvs();
+  return Response.json({
+    data: grants,
+    success: true,
+    message: 'Grants fetched successfully',
   });
 }
