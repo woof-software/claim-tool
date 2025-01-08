@@ -24,6 +24,10 @@ export const WHITELABEL_ENV = _WHITELABEL_ENV;
 
 interface Features {
   APP_NAME: string;
+  BG_IMAGE: {
+    className: string;
+    src: string;
+  };
   DELEGATION_REQUIRED: boolean;
   DELEGATION_ENABLED: boolean;
   DELEGATES_URL?: string;
@@ -32,12 +36,20 @@ interface Features {
 const featureMatrix: Record<WHITELABEL_ENV, Features> = {
   OPTIMISM: {
     APP_NAME: 'OP Claim Tool',
+    BG_IMAGE: {
+      src: '/optimism-bg-img.svg',
+      className: 'object-cover',
+    },
     DELEGATION_REQUIRED: false,
     DELEGATION_ENABLED: false,
     DELEGATES_URL: 'https://vote.optimism.io/delegates',
   },
   ZK_SYNC: {
     APP_NAME: 'ZKsync Claim Tool',
+    BG_IMAGE: {
+      src: '/zksync-bg-img.svg',
+      className: 'object-cover opacity-50',
+    },
     DELEGATION_REQUIRED: true,
     DELEGATION_ENABLED: true,
     DELEGATES_URL: 'https://vote.optimism.io/delegates',
