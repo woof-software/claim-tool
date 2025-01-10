@@ -4,9 +4,7 @@ import ConnectButton from '@/components/auth/ConnectButton';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAccount } from 'wagmi';
 import { FEATURES } from '../../config/features';
-import { whitelistedAddresses } from '../../config/storage';
 import Logo from './common/images/Logo';
 import { Button } from './ui/button';
 
@@ -28,18 +26,6 @@ const links = [
 
 const Header = () => {
   const pathname = usePathname();
-  const { address } = useAccount();
-
-  const linksWithAdmin = whitelistedAddresses.includes(address)
-    ? [
-        {
-          title: 'Admin',
-          href: '/admin',
-          isExternal: false,
-        },
-        ...links,
-      ]
-    : links;
 
   return (
     <div className="h-20 bg-white border-b border-neutral-200 px-3">
@@ -48,7 +34,7 @@ const Header = () => {
           <Logo />
         </Link>
         <div className="flex items-center gap-4">
-          {linksWithAdmin.map((link) => (
+          {links.map((link) => (
             <Button
               className={`h-full rounded-none py-6 group relative ${
                 pathname === link.href
