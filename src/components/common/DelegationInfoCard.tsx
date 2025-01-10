@@ -1,6 +1,6 @@
 import { Card, CardContent } from '../ui/card';
 
-export default function InfoCard() {
+export default function DelegationInfoCard() {
   return (
     <Card className="w-[430px] h-[282px] bg-neutral-100 border-none shadow-none">
       <CardContent className="p-10">
