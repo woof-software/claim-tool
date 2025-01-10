@@ -1,11 +1,25 @@
 import Image from 'next/image';
-import { FEATURES } from '../../../../config/features';
+import { WHITELABEL_ENV } from '../../../../config/features';
 
-const BackgroundImage = ({
-  className,
-  src,
-}: { className?: string; src: string }) => {
-  return <Image className={className} src={src} alt="Background Image" fill />;
+const getClassName = () => {
+  switch (WHITELABEL_ENV) {
+    case 'ZK_SYNC':
+      return 'opacity-10';
+    default:
+      return '';
+  }
+};
+
+const BackgroundImage = ({ src }: { src: string }) => {
+  const className = getClassName();
+  return (
+    <Image
+      className={`object-cover ${className}`}
+      src={src}
+      alt="Background Image"
+      fill
+    />
+  );
 };
 
 export default BackgroundImage;
