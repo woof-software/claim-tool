@@ -5,57 +5,26 @@ import {
   getChainForChainId,
 } from '@/lib/getPublicClientForChain';
 import { truncate } from '@/lib/truncate';
-import { cn } from '@/lib/utils';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
-import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 import { CurrencySymbol } from './CurrencySymbol';
 import { ProjectImage } from './images/ProjectImage';
 
-const GrantCard = ({
-  grant,
-  isClaimDialogOpen = false,
-}: {
-  grant: Grant;
-  isClaimDialogOpen?: boolean;
-}) => {
+const GrantCard = ({ grant }: { grant: Grant }) => {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
+  const { isConnected } = useAccount();
 
   const isCorrectChain = grant.chainId === chainId;
   const chain = getChainForChainId(grant.chainId);
 
-  const [showClaimDialog, setShowClaimDialog] = useState(false);
-  const { isConnected } = useAccount();
-
-  const handleClaim = () => {
-    setShowClaimDialog(true);
-  };
-
   return (
     <>
-      <Card
-        className={cn(
-          'shadow-none',
-          isClaimDialogOpen && 'border border-neutral-300',
-          isClaimDialogOpen && isCorrectChain && 'cursor-pointer',
-        )}
-      >
-        {grant.currentUserCanClaim &&
-          isClaimDialogOpen &&
-          isConnected &&
-          !isCorrectChain && (
-            <div className="flex items-center justify-between bg-bgClaimcardHeader px-10 py-2 rounded-t-lg">
-              <p className="text-sm">
-                You are eligible to claim this grant on <b>{chain.name}</b>
-              </p>
-            </div>
-          )}
-        {grant.currentUserCanClaim && !isClaimDialogOpen && isConnected && (
+      <Card className="shadow-none">
+        {grant.currentUserCanClaim && isConnected && (
           <div className="flex items-center justify-between bg-bgClaimcardHeader px-10 py-2 rounded-t-lg">
             <p className="text-sm">
               You are eligible to claim this grant
@@ -67,13 +36,12 @@ const GrantCard = ({
               )}
             </p>
             {isCorrectChain ? (
-              <Button
-                variant="link"
-                className="text-primaryAction font-semibold hover:no-underline p-0"
-                onClick={handleClaim}
+              <Link
+                className="text-primaryAction font-semibold hover:no-underline p-0 py-2"
+                href={`/grants/${grant.id}`}
               >
                 Claim now
-              </Button>
+              </Link>
             ) : (
               <div>
                 <Button
@@ -175,13 +143,6 @@ const GrantCard = ({
           )}
         </CardContent>
       </Card>
-      {!isClaimDialogOpen && (
-        <ClaimDialog
-          isOpen={showClaimDialog}
-          setOpen={setShowClaimDialog}
-          grantId={grant.id}
-        />
-      )}
     </>
   );
 };

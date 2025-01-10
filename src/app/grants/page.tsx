@@ -1,6 +1,5 @@
 'use client';
 
-import ClaimButton from '@/components/ClaimButton';
 import GrantsList from '@/components/common/GrantList';
 import { SpinningLoader } from '@/components/common/SpinningLoader';
 import { Button } from '@/components/ui/button';
@@ -15,19 +14,11 @@ import {
 import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useAccount } from 'wagmi';
 
 const Grants = () => {
   const { displayedGrants, loadMore, grants, isLoading } = useGrants();
-  const { isConnected } = useAccount();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
-
-  const claimableGrants = useMemo(() => {
-    return grants.filter((grant) => grant.currentUserCanClaim);
-  }, [grants]);
-
-  const claimableGrantIds = claimableGrants.map((grant) => grant.id);
 
   const filteredAndSortedGrants = useMemo(() => {
     let filtered = displayedGrants;
@@ -71,15 +62,6 @@ const Grants = () => {
           delegated to. For grantees, this claiming tool offers a self-serve
           interface to claim and delegate your grant.
         </p>
-        <div className="flex items-center gap-4">
-          <ClaimButton grantIds={claimableGrantIds} />
-          {claimableGrants.length > 0 && isConnected && (
-            <span className="text-sm font-medium text-gray-500">
-              {claimableGrants.length} grant
-              {claimableGrants.length > 1 ? 's' : ''} available to claim
-            </span>
-          )}
-        </div>
       </div>
       <div className="flex items-center gap-2 my-6">
         <div className="relative w-full">
@@ -108,7 +90,9 @@ const Grants = () => {
         </Select>
       </div>
       <div className="bg-white w-full flex items-center justify-between py-3 px-10 rounded-lg">
-        <p className="font-semibold">{grants.length} Projects</p>
+        <p className="font-semibold">
+          {isLoading ? 'Loading' : grants.length} Projects
+        </p>
         <p className="font-semibold">
           <span>Claimed</span> /{' '}
           <span className="text-gray-500">Grant amount</span>
