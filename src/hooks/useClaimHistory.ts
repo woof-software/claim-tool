@@ -65,7 +65,7 @@ export const useClaimHistory = (
   const grantIds = grants.map((grant) => grant.grantId);
   return useQuery({
     queryKey: ['claim-history', userAddress, grantIds],
-    enabled: !!userAddress,
+    enabled: !!userAddress && grantIds.length > 0,
     queryFn: async () => {
       const response = await fetch(hedgeyGraphqlApiEndpoint, {
         method: 'POST',

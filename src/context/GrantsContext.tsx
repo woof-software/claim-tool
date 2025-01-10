@@ -47,6 +47,7 @@ type GrantsContextType = {
   displayedGrants: Grant[];
   loadMore: () => void;
   isLoading: boolean;
+  isFetched: boolean;
 };
 
 const GrantsContext = createContext<GrantsContextType | undefined>(undefined);
@@ -69,24 +70,35 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const { grants } = useGetGrants();
   const { address } = useAccount();
   const campaignIds = grants.map((grant) => grant.uuid);
-  const { data: hedgeyCampaigns, isLoading: isLoadingHedgeyCampaigns } =
-    useGetHedgeyCampaigns(campaignIds);
-  const { data: proofs, isLoading: isLoadingProofs } = useGetCanClaim(
-    hedgeyCampaigns ?? [],
+  const {
+    data: hedgeyCampaigns,
+    isLoading: isLoadingHedgeyCampaigns,
+    isFetched: isFetchedHedgeyCampaigns,
+  } = useGetHedgeyCampaigns(campaignIds);
+  const {
+    data: proofs,
+    isLoading: isLoadingProofs,
+    isFetched: isFetchedProofs,
+  } = useGetCanClaim(hedgeyCampaigns ?? []);
+  const {
+    data: claimHistory = {},
+    isLoading: isLoadingClaimHistory,
+    isFetched: isFetchedClaimHistory,
+  } = useClaimHistory(
+    address,
+    hedgeyCampaigns
+      ?.filter((campaign) => !!campaign?.id)
+      .map((campaign) => ({
+        grantId: campaign.id as string,
+        chainId: getChainIdByNetworkName(campaign.network),
+      })) || [],
   );
-  const { data: claimHistory = {}, isLoading: isLoadingClaimHistory } =
-    useClaimHistory(
-      address,
-      hedgeyCampaigns
-        ?.filter((campaign) => !!campaign?.id)
-        .map((campaign) => ({
-          grantId: campaign.id as string,
-          chainId: getChainIdByNetworkName(campaign.network),
-        })) || [],
-    );
 
   const isLoading =
     isLoadingHedgeyCampaigns || isLoadingProofs || isLoadingClaimHistory;
+
+  const isFetched =
+    isFetchedHedgeyCampaigns && isFetchedProofs && isFetchedClaimHistory;
 
   const supportedChainIds = getChainConfig().chains.map((chain) => chain.id);
 
@@ -150,7 +162,6 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
     })
     .filter((grant) => grant !== null)
     .filter((grant) => {
-      console.log(grant);
       const chainId = getChainIdByNetworkName(grant.campaign.network);
       return supportedChainIds.includes(chainId);
     })
@@ -169,6 +180,7 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
         displayedGrants: mappedGrants.slice(0, displayCount),
         loadMore,
         isLoading,
+        isFetched,
       }}
     >
       {children}
