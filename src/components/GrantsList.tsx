@@ -22,9 +22,9 @@ const GrantsList = () => {
     <div className="flex flex-col gap-4 border border-border rounded-lg p-4">
       <h1>Grants</h1>
       {grants.map((grant) => (
-        <div key={grant.claimUid}>
-          <h2>{grant.grantTitle}</h2>
-          <p>{grant.grantDescription}</p>
+        <div key={grant.uuid}>
+          <h2>{grant.title}</h2>
+          <p>{grant.description}</p>
           <Button>Claim</Button>
         </div>
       ))}

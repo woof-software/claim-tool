@@ -1,42 +1,104 @@
-import { parseCsvContent } from '@/lib/parseCsvContent';
-import { getFile, listFiles } from '@/lib/storage';
-
 export const dynamic = 'force-dynamic';
 
-export type GrantClaimRow = {
-  claimUid: string;
-  grantTitle: string;
-  grantDescription: string;
+export type GrantRow = {
+  uuid: string;
+  title: string;
+  description?: string;
+  projectImage?: string;
 };
 
-async function getGrantsFromAllCsvs() {
-  const csvFiles = await listFiles();
-  const csvContents = await Promise.all(
-    csvFiles
-      .map((file) => file.name)
-      .filter((fileName): fileName is string => !!fileName)
-      .map((fileName) => getFile(fileName)),
-  );
+const getUuidFromUrlOrUuid = (urlOrUuid: string) => {
+  // UUID v4 regex pattern
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  const results: GrantClaimRow[] = [];
-  for (const csvContent of csvContents) {
-    const rows = parseCsvContent(csvContent);
-
-    results.push(
-      ...rows.map((row) => {
-        return {
-          claimUid: row.UUID || '<placeholder>',
-          grantTitle: row.Title || '<placeholder>',
-          grantDescription: '<placeholder>',
-        };
-      }),
-    );
+  // Check if input is already a UUID
+  if (uuidPattern.test(urlOrUuid)) {
+    return urlOrUuid;
   }
-  return results;
-}
+
+  try {
+    // Try to parse as URL and get last segment
+    const url = new URL(urlOrUuid);
+    const pathSegments = url.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+
+    // Check if last segment is UUID
+    if (lastSegment && uuidPattern.test(lastSegment)) {
+      return lastSegment;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  return null;
+};
 
 export async function GET() {
-  const grants = await getGrantsFromAllCsvs();
+  const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
+  const sheetId = process.env.GOOGLE_SHEETS_ID;
+
+  if (!apiKey) {
+    return Response.json({
+      success: false,
+      message: 'API key is not set',
+    });
+  }
+  if (!sheetId) {
+    return Response.json({
+      success: false,
+      message: 'Sheet ID is not set',
+    });
+  }
+
+  // Fetch sheet names
+  const sheetNamesResponse = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?&fields=sheets.properties`,
+    {
+      headers: {
+        'X-goog-api-key': apiKey,
+      },
+    },
+  );
+  const sheetNames = await sheetNamesResponse.json();
+  const title: string = sheetNames?.sheets[0]?.properties?.title;
+
+  if (!title) {
+    return Response.json({
+      success: false,
+      message: 'Sheet title is not set',
+    });
+  }
+
+  const response = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${title}`,
+    {
+      headers: {
+        'X-goog-api-key': apiKey,
+      },
+    },
+  );
+  const result = await response.json();
+  const [header, ...rows] = result.values as string[][];
+  const grants = rows
+    .map((row) => {
+      return row.reduce(
+        (acc, curr, index) => {
+          acc[header[index].toLowerCase()] = curr;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+    })
+    .map((grant) => {
+      return {
+        uuid: getUuidFromUrlOrUuid(grant.uuid),
+        title: grant.title,
+        description: grant.description,
+        projectImage: grant.image,
+      } as GrantRow;
+    })
+    .filter((grant) => grant.uuid);
   return Response.json({
     data: grants,
     success: true,

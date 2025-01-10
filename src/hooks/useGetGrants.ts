@@ -1,12 +1,12 @@
-import type { GrantClaimRow } from '@/app/api/grants/route';
+import type { GrantRow } from '@/app/api/grants/route';
 import { useQuery } from '@tanstack/react-query';
 
 type ApiResponse = {
-  data: GrantClaimRow[];
+  data: GrantRow[];
 };
 
 export const useGetGrants = () => {
-  const { data, isLoading, isError } = useQuery<GrantClaimRow[]>({
+  const { data, isLoading, isError } = useQuery<GrantRow[]>({
     queryKey: ['grants'],
     queryFn: async () => {
       const response = await fetch('/api/grants');

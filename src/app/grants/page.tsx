@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FilterOption, useGrants } from '@/context/GrantsContext';
-import { Loader, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
