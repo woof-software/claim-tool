@@ -5,6 +5,7 @@ import { DaysUntilCard } from '@/components/common/DaysUntilCard';
 import DelegationInfoCard from '@/components/common/DelegationInfoCard';
 import ProjectCard from '@/components/common/ProjectCard';
 import { SpinningLoader } from '@/components/common/SpinningLoader';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGrants } from '@/context/GrantsContext';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -15,10 +16,10 @@ const { DELEGATION_ENABLED } = FEATURES;
 
 const GrantPage = () => {
   const { grantId } = useParams();
-  const { grants, isLoading } = useGrants();
+  const { grants, isLoading, isFetched } = useGrants();
   const grant = grants.find((grant) => grant.id === grantId);
 
-  if (isLoading) {
+  if (!isFetched || isLoading) {
     return <SpinningLoader />;
   }
 
@@ -53,7 +54,13 @@ const GrantPage = () => {
     );
   }
 
-  return <div>Grant not found</div>;
+  return (
+    <Card className="flex items-center justify-center">
+      <CardHeader>
+        <CardTitle>Grant not found</CardTitle>
+      </CardHeader>
+    </Card>
+  );
 };
 
 export default GrantPage;
