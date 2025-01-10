@@ -15,6 +15,7 @@ import type React from 'react';
 import { createContext, useContext, useState } from 'react';
 import { formatUnits } from 'viem';
 import { useAccount } from 'wagmi';
+import { getChainConfig } from '../../config/features';
 
 export enum FilterOption {
   Highest = 'Highest',
@@ -87,6 +88,8 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const isLoading =
     isLoadingHedgeyCampaigns || isLoadingProofs || isLoadingClaimHistory;
 
+  const supportedChainIds = getChainConfig().chains.map((chain) => chain.id);
+
   // Map the Hedgey campaigns to the grants, ignore any grants that don't have a corresponding campaign
   const mappedGrants = grants
     .map((grant) => {
@@ -146,6 +149,11 @@ export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
       } as Grant | null;
     })
     .filter((grant) => grant !== null)
+    .filter((grant) => {
+      console.log(grant);
+      const chainId = getChainIdByNetworkName(grant.campaign.network);
+      return supportedChainIds.includes(chainId);
+    })
     .toSorted(
       (a, b) => Number(b.currentUserCanClaim) - Number(a.currentUserCanClaim),
     );
