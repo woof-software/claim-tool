@@ -1,5 +1,4 @@
 import type { Grant } from '@/context/GrantsContext';
-import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
 import GrantCard from './GrantCard';

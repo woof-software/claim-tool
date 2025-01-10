@@ -55,6 +55,7 @@ export type HedgeyCampaign = NonNullable<
 export const useGetHedgeyCampaigns = (campaignIds: string[]) => {
   return useQuery({
     queryKey: ['get-hedgey-campaigns', campaignIds],
+    enabled: campaignIds.length > 0,
     queryFn: async () => {
       const response = await fetch(hedgeyGraphqlApiEndpoint, {
         method: 'POST',

@@ -51,6 +51,6 @@ export const useGetCanClaim = (campaigns: HedgeyCampaign[]) => {
         }),
       );
     },
-    enabled: !!address,
+    enabled: !!address && campaignIds.length > 0,
   });
 };

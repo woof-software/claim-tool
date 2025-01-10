@@ -16,7 +16,8 @@ import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 const Grants = () => {
-  const { displayedGrants, loadMore, grants, isLoading } = useGrants();
+  const { displayedGrants, loadMore, grants, isLoading, isFetched } =
+    useGrants();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
 
@@ -52,6 +53,10 @@ const Grants = () => {
 
     return filtered;
   }, [displayedGrants, searchTerm, filter]);
+
+  if (!isFetched && !isLoading) {
+    return null;
+  }
 
   return (
     <>
