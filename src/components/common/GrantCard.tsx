@@ -7,20 +7,14 @@ import {
 import { truncate } from '@/lib/truncate';
 import { cn } from '@/lib/utils';
 import { RiArrowRightUpLine } from '@remixicon/react';
-import { Hexagon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAccount, useChainId, useChains, useSwitchChain } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { ClaimDialog } from '../dialogs/ClaimDialog';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
 import { CurrencySymbol } from './CurrencySymbol';
+import { ProjectImage } from './images/ProjectImage';
 
 const GrantCard = ({
   grant,
@@ -97,7 +91,7 @@ const GrantCard = ({
         )}
         <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 flex-grow">
-            <Hexagon className="w-10 h-10" />
+            <ProjectImage src={grant.projectImage} />
             <div className="flex flex-col gap-2 max-w-2xl">
               <p className="font-semibold text-xl">{grant.title}</p>
               <p className="text-sm text-gray-500 line-clamp-3">

@@ -37,6 +37,6 @@
     }
   ],
   "files": {
-    "ignore": ["**/.next/**"]
+    "ignore": ["**/.next/**", "**/*/graphql-env.d.ts"]
   }
 }
