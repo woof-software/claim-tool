@@ -49,7 +49,7 @@ const featureMatrix: Record<WHITELABEL_ENV, Features> = {
     },
     DELEGATION_REQUIRED: true,
     DELEGATION_ENABLED: true,
-    DELEGATES_URL: 'https://vote.optimism.io/delegates',
+    DELEGATES_URL: 'https://vote.zknation.io/dao/delegates',
   },
 };
 
