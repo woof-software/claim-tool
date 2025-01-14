@@ -60,7 +60,7 @@ const GrantCard = ({ grant }: { grant: Grant }) => {
         )}
         <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10 relative">
           {grant.proof.claimed && (
-            <Badge className="absolute top-0 right-0 -translate-x-[8px] -translate-y-1/2 ">
+            <Badge className="absolute top-0 right-0 -translate-x-[8px] -translate-y-1/2 cursor-default">
               Claimed
             </Badge>
           )}
