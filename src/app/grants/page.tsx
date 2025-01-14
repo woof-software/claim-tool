@@ -2,7 +2,7 @@
 
 import WalletConnectButton from '@/components/auth/ConnectButton';
 import GrantsList from '@/components/common/GrantList';
-import { SpinningLoader } from '@/components/common/SpinningLoader';
+import { GrantCardSkeleton } from '@/components/common/skeletons/GrantCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import {
 import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnectorClient } from 'wagmi';
 
 const Grants = () => {
   const { displayedGrants, loadMore, grants, isLoading, isFetched } =
@@ -24,6 +24,7 @@ const Grants = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
 
+  const { isFetched: isFetchedConnector } = useConnectorClient();
   const { isConnected } = useAccount();
 
   const filteredAndSortedGrants = useMemo(() => {
@@ -59,7 +60,7 @@ const Grants = () => {
     return filtered;
   }, [displayedGrants, searchTerm, filter]);
 
-  if (!isConnected) {
+  if (isFetchedConnector && !isConnected) {
     // Display a card to connect wallet, with connect button
     return (
       <Card>
@@ -111,7 +112,7 @@ const Grants = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="bg-white w-full flex items-center justify-between py-3 px-10 rounded-lg">
+      <div className="bg-white w-full flex items-center justify-between py-3 px-10 rounded-lg mb-4">
         <p className="font-semibold">
           {isLoading ? 'Loading' : grants.length} Projects
         </p>
@@ -121,7 +122,11 @@ const Grants = () => {
         </p>
       </div>
       {isLoading ? (
-        <SpinningLoader />
+        <div className="space-y-4">
+          <GrantCardSkeleton />
+          <GrantCardSkeleton />
+          <GrantCardSkeleton />
+        </div>
       ) : (
         <GrantsList grants={filteredAndSortedGrants} />
       )}

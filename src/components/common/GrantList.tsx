@@ -12,7 +12,7 @@ const GrantsList = ({
 }) => {
   if (grants.length === 0) {
     return (
-      <Card className="mt-4 border-none flex items-center justify-center py-10">
+      <Card className="border-none flex items-center justify-center py-10">
         <CardHeader>
           <CardTitle>No grants found</CardTitle>
         </CardHeader>
@@ -20,7 +20,7 @@ const GrantsList = ({
     );
   }
   return (
-    <ScrollArea className="mt-4">
+    <ScrollArea className="">
       <div className="flex flex-col gap-4">
         {grants.map((grant) => (
           <GrantCard key={grant.id} grant={grant} />

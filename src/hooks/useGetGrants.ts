@@ -40,26 +40,6 @@ export type ClaimHistory = {
   events: ClaimHistoryEvent[];
 };
 
-export const useGetGrants = () => {
-  const { address } = useAccount();
-  const { data, isLoading, isError } = useQuery<GrantRow[]>({
-    queryKey: ['grants', address],
-    queryFn: async () => {
-      console.log('fetching grants OG');
-      const response = await fetch(`/api/grants?address=${address}`);
-      const result: ApiResponse = await response.json();
-      return result.data;
-    },
-    enabled: !!address,
-  });
-
-  return {
-    grants: data ?? [],
-    isLoading,
-    isError,
-  };
-};
-
 const query = graphql(`
   query GetGrants($input: CampaignQueryInput) {
     campaigns(query: $input) {
@@ -341,7 +321,6 @@ export const useGetGrants2 = () => {
   return useQuery({
     queryKey: ['grants', '2', address],
     queryFn: async () => {
-      console.log('fetching grants 2');
       const response = await fetch(`/api/grants?address=${address}`);
       const grants: ApiResponse = await response.json();
       const campaignIds = grants.data.map((grant) => grant.uuid);

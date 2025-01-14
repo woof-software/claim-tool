@@ -55,7 +55,6 @@ type GrantsProviderProps = {
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const [displayCount, setDisplayCount] = useState(10);
 
-  const { grants } = useGetGrants();
   const { data, isLoading, isFetched } = useGetGrants2();
 
   const loadMore = () => {
