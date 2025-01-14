@@ -316,10 +316,10 @@ const getProofs = async (address: string, campaigns: HedgeyCampaign[]) => {
   );
 };
 
-export const useGetGrants2 = () => {
+export const useGetGrants = () => {
   const { address } = useAccount();
   return useQuery({
-    queryKey: ['grants', '2', address],
+    queryKey: ['grants', address],
     queryFn: async () => {
       const response = await fetch(`/api/grants?address=${address}`);
       const grants: ApiResponse = await response.json();

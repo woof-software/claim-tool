@@ -118,7 +118,7 @@ const WalletConnectButton = () => {
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuItem
                         className="flex items-center justify-between px-6 font-semibold"
-                        onClick={() => router.push('/claim')}
+                        onClick={() => router.push('/claim-history')}
                       >
                         Claim History <RiFileHistoryLine />
                       </DropdownMenuItem>

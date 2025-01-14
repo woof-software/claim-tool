@@ -1,6 +1,6 @@
 import type { Claim } from '@/app/api/claims/route';
 import type { ClaimHistoryEvent } from '@/hooks/useClaimHistory';
-import { useGetGrants, useGetGrants2 } from '@/hooks/useGetGrants';
+import { useGetGrants } from '@/hooks/useGetGrants';
 import type { HedgeyCampaign } from '@/hooks/useGetHedgeyCampaigns';
 import type React from 'react';
 import { createContext, useContext, useState } from 'react';
@@ -55,7 +55,7 @@ type GrantsProviderProps = {
 export const GrantsProvider: React.FC<GrantsProviderProps> = ({ children }) => {
   const [displayCount, setDisplayCount] = useState(10);
 
-  const { data, isLoading, isFetched } = useGetGrants2();
+  const { data, isLoading, isFetched } = useGetGrants();
 
   const loadMore = () => {
     setDisplayCount((prevCount) => Math.min(prevCount + 5, data?.length ?? 0));
