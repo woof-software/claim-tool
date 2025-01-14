@@ -30,6 +30,7 @@ interface Features {
   DELEGATION_REQUIRED: boolean;
   DELEGATION_ENABLED: boolean;
   DELEGATES_URL?: string;
+  CONFIRMATION_CHECKMARK_BG_COLOR: string;
 }
 
 const featureMatrix: Record<WHITELABEL_ENV, Features> = {
@@ -41,6 +42,7 @@ const featureMatrix: Record<WHITELABEL_ENV, Features> = {
     DELEGATION_REQUIRED: false,
     DELEGATION_ENABLED: false,
     DELEGATES_URL: 'https://vote.optimism.io/delegates',
+    CONFIRMATION_CHECKMARK_BG_COLOR: '#68DFDC',
   },
   ZK_SYNC: {
     APP_NAME: 'ZKsync Claim Tool',
@@ -50,6 +52,7 @@ const featureMatrix: Record<WHITELABEL_ENV, Features> = {
     DELEGATION_REQUIRED: true,
     DELEGATION_ENABLED: true,
     DELEGATES_URL: 'https://vote.zknation.io/dao/delegates',
+    CONFIRMATION_CHECKMARK_BG_COLOR: 'black',
   },
 };
 
