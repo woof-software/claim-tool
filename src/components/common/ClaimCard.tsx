@@ -16,7 +16,6 @@ import {
 import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter } from '../ui/card';
-import { DialogClose } from '../ui/dialog';
 import {
   Form,
   FormControl,
@@ -31,7 +30,8 @@ import SuccessCheckmark from './images/SuccessCheckmark';
 import { Loader2 } from 'lucide-react';
 import { FEATURES } from '../../../config/features';
 
-const { DELEGATION_REQUIRED, DELEGATES_URL } = FEATURES;
+const { DELEGATION_REQUIRED, DELEGATES_URL, CONFIRMATION_CHECKMARK_BG_COLOR } =
+  FEATURES;
 
 const FormSchema = z
   .object({
@@ -132,14 +132,10 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
     }
   }
 
-  function handleClose() {
-    router.push('/claim');
-  }
-
   const isDelegationRequired = form.watch('isDelegationRequired');
 
   return (
-    <Card className="bg-transparent border border-neutral-300 shadow-none py-10 px-4 w-[634px]">
+    <Card className="bg-transparent border border-neutral-300 shadow-none py-10 px-4">
       {step === 'form' && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -214,17 +210,8 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
       {step === 'confirmation' && (
         <CardContent className="p-0 space-y-6 flex flex-col items-center">
           <p className="text-lg">All done!</p>
-          <SuccessCheckmark />
+          <SuccessCheckmark color={CONFIRMATION_CHECKMARK_BG_COLOR} />
           <div className="flex space-x-2">
-            <DialogClose asChild>
-              <Button
-                onClick={handleClose}
-                variant="outline"
-                className="w-full"
-              >
-                See my claim history
-              </Button>
-            </DialogClose>
             {txHash && (
               <Link
                 target="_blank"
