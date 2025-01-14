@@ -1,8 +1,10 @@
 'use client';
 
+import WalletConnectButton from '@/components/auth/ConnectButton';
 import GrantsList from '@/components/common/GrantList';
 import { SpinningLoader } from '@/components/common/SpinningLoader';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -14,12 +16,15 @@ import {
 import { FilterOption, useGrants } from '@/context/GrantsContext';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 const Grants = () => {
   const { displayedGrants, loadMore, grants, isLoading, isFetched } =
     useGrants();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterOption>(FilterOption.Highest);
+
+  const { isConnected } = useAccount();
 
   const filteredAndSortedGrants = useMemo(() => {
     let filtered = displayedGrants;
@@ -53,6 +58,18 @@ const Grants = () => {
 
     return filtered;
   }, [displayedGrants, searchTerm, filter]);
+
+  if (!isConnected) {
+    // Display a card to connect wallet, with connect button
+    return (
+      <Card>
+        <CardContent className="py-8 flex flex-col items-center justify-center gap-4">
+          Connect your wallet to view grants
+          <WalletConnectButton />
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!isFetched && !isLoading) {
     return null;
