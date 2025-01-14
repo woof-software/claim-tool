@@ -42,11 +42,9 @@ const GrantPage = () => {
             {grant?.grantAmount} {grant?.campaign.token?.ticker}
           </span>
         </h1>
-        <div className="pt-14 flex items-start gap-8">
-          <div className="w-3/5">
-            <ClaimCard grant={grant} />
-          </div>
-          <div className="flex flex-col gap-4 w-2/5">
+        <div className="pt-14 flex items-start gap-14">
+          <ClaimCard grant={grant} />
+          <div className="flex flex-col gap-2">
             <ProjectCard grant={grant} />
             <DaysUntilCard grant={grant} />
             {DELEGATION_ENABLED && <DelegationInfoCard />}
