@@ -1,3 +1,6 @@
+import _ from 'lodash';
+import type { NextRequest } from 'next/server';
+
 export const dynamic = 'force-dynamic';
 
 export type GrantRow = {
@@ -5,6 +8,7 @@ export type GrantRow = {
   title: string;
   description?: string;
   projectImage?: string;
+  address: string;
 };
 
 const getUuidFromUrlOrUuid = (urlOrUuid: string) => {
@@ -34,7 +38,9 @@ const getUuidFromUrlOrUuid = (urlOrUuid: string) => {
   return null;
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const address = searchParams.get('address');
   const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
   const sheetId = process.env.GOOGLE_SHEETS_ID;
 
@@ -80,25 +86,35 @@ export async function GET() {
   );
   const result = await response.json();
   const [header, ...rows] = result.values as string[][];
-  const grants = rows
-    .map((row) => {
-      return row.reduce(
+  const grants = _.chain(rows)
+    .map((row) =>
+      row.reduce(
         (acc, curr, index) => {
           acc[header[index].toLowerCase()] = curr;
           return acc;
         },
         {} as Record<string, string>,
-      );
-    })
-    .map((grant) => {
-      return {
-        uuid: getUuidFromUrlOrUuid(grant.uuid),
-        title: grant.title,
-        description: grant.description,
-        projectImage: grant.image,
-      } as GrantRow;
-    })
-    .filter((grant) => grant.uuid);
+      ),
+    )
+    .map(
+      (grant) =>
+        ({
+          uuid: getUuidFromUrlOrUuid(grant.uuid),
+          title: grant.title,
+          description: grant.description,
+          projectImage: grant.image,
+          address: grant.address,
+        }) as GrantRow,
+    )
+    .filter((grant) => !!grant.uuid)
+    .filter((grant) =>
+      address ? grant.address.toLowerCase() === address.toLowerCase() : true,
+    )
+    // If there are duplicates by (uuid, address), keep the bottom row
+    .reverse()
+    .uniqBy((grant) => `${grant.uuid}-${grant.address}`)
+    .value();
+
   return Response.json({
     data: grants,
     success: true,
