@@ -8,6 +8,7 @@ import { truncate } from '@/lib/truncate';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 import { CurrencySymbol } from './CurrencySymbol';
@@ -57,7 +58,12 @@ const GrantCard = ({ grant }: { grant: Grant }) => {
             )}
           </div>
         )}
-        <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10">
+        <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10 relative">
+          {grant.proof.claimed && (
+            <Badge className="absolute top-0 right-0 -translate-x-[8px] -translate-y-1/2 ">
+              Claimed
+            </Badge>
+          )}
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 flex-grow">
             <ProjectImage src={grant.projectImage} />
             <div className="flex flex-col gap-2 max-w-2xl">
