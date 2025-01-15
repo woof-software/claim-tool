@@ -6,7 +6,6 @@ import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -52,7 +51,6 @@ const FormSchema = z
   });
 
 export default function ClaimCard({ grant }: { grant: Grant }) {
-  const router = useRouter();
   const { toast } = useToast();
   const { claim } = useGetClaim({
     uuid: grant.id,
