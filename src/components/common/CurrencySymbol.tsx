@@ -3,6 +3,7 @@ import Image from 'next/image';
 
 import type { HedgeyCampaign } from '@/hooks/useGetHedgeyCampaigns';
 import ETH from '../../../public/currency_symbols/eth.png';
+import OP from '../../../public/currency_symbols/op.png';
 import POA from '../../../public/currency_symbols/poa.png';
 
 const getSrc = (currencyName?: string | null) => {
@@ -12,6 +13,8 @@ const getSrc = (currencyName?: string | null) => {
     case 'POA':
     case 'PLBR':
       return POA;
+    case 'OP':
+      return OP;
     default:
       return undefined;
   }
