@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +40,7 @@ const getUuidFromUrlOrUuid = (urlOrUuid: string) => {
 };
 
 export async function GET(req: NextRequest) {
+  const __ = cookies();
   const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
   const sheetId = process.env.GOOGLE_SHEETS_ID;
 
