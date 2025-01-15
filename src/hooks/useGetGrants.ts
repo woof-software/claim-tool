@@ -319,7 +319,7 @@ const getProofs = async (address: string, campaigns: HedgeyCampaign[]) => {
 export const useGetGrants = () => {
   const { address } = useAccount();
   return useQuery({
-    queryKey: ['grants', address],
+    queryKey: ['grants', address || 'unknown'],
     queryFn: async () => {
       const response = await fetch(`/api/grants?address=${address}`);
       const grants: ApiResponse = await response.json();
@@ -418,6 +418,5 @@ export const useGetGrants = () => {
         .toSorted((a, b) => (a.address === address ? -1 : 1));
       return mappedGrants;
     },
-    enabled: !!address,
   });
 };
