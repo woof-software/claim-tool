@@ -20,13 +20,11 @@ const GrantsList = ({
     );
   }
   return (
-    <ScrollArea className="">
-      <div className="flex flex-col gap-4">
-        {grants.map((grant) => (
-          <GrantCard key={grant.id} grant={grant} />
-        ))}
-      </div>
-    </ScrollArea>
+    <div className="flex flex-col gap-4">
+      {grants.map((grant) => (
+        <GrantCard key={grant.id} grant={grant} />
+      ))}
+    </div>
   );
 };
 
