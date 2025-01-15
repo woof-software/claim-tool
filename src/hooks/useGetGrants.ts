@@ -325,7 +325,15 @@ export const useGetGrants = () => {
       const grants: ApiResponse = await response.json();
       const campaignIds = grants.data.map((grant) => grant.uuid);
       const hedgeyCampaigns = await fetchCampaigns(campaignIds);
-      const proofs = await getProofs(address, hedgeyCampaigns);
+      const grantsForCurrentAddress = grants.data.filter(
+        (grant) => grant.address.toLowerCase() === address?.toLowerCase(),
+      );
+      const proofs = await getProofs(
+        address,
+        hedgeyCampaigns.filter((campaign) =>
+          grantsForCurrentAddress.some((grant) => grant.uuid === campaign.id),
+        ),
+      );
 
       const claimHistory = await getClaimHistory(
         address,
@@ -340,9 +348,12 @@ export const useGetGrants = () => {
           const campaign = hedgeyCampaigns?.find(
             (campaign) => campaign.id === grant.uuid,
           );
-          const proof = proofs?.find((proof) => proof?.uuid === grant.uuid);
+          const proof = proofs?.find(
+            (proof) =>
+              proof?.uuid === grant.uuid && proof.address === grant.address,
+          );
 
-          if (!proof || !campaign) return null;
+          if (!campaign) return null;
 
           const grantAmount = Number(
             formatUnits(
@@ -358,7 +369,9 @@ export const useGetGrants = () => {
             ),
           );
 
-          const currentUserCanClaim = proof.canClaim && !proof.claimed;
+          const currentUserCanClaim = proof
+            ? proof.canClaim && !proof.claimed
+            : false;
           const date = new Date(campaign.createdAt as string);
           const chainId = getChainIdByNetworkName(campaign.network);
           const claimEvents = claimHistory[grant.uuid];
@@ -390,6 +403,7 @@ export const useGetGrants = () => {
             latestClaimHash,
             tokenReleasedInDays,
             delegateTo: latestDelegateTo,
+            address: grant.address,
           } as Grant | null;
         })
         .filter((grant) => grant !== null)
@@ -400,7 +414,8 @@ export const useGetGrants = () => {
         .toSorted(
           (a, b) =>
             Number(b.currentUserCanClaim) - Number(a.currentUserCanClaim),
-        );
+        )
+        .toSorted((a, b) => (a.address === address ? -1 : 1));
       return mappedGrants;
     },
     enabled: !!address,

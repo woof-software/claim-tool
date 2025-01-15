@@ -39,8 +39,6 @@ const getUuidFromUrlOrUuid = (urlOrUuid: string) => {
 };
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const address = searchParams.get('address');
   const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
   const sheetId = process.env.GOOGLE_SHEETS_ID;
 
@@ -107,9 +105,6 @@ export async function GET(req: NextRequest) {
         }) as GrantRow,
     )
     .filter((grant) => !!grant.uuid)
-    .filter((grant) =>
-      address ? grant.address.toLowerCase() === address.toLowerCase() : true,
-    )
     // If there are duplicates by (uuid, address), keep the bottom row
     .reverse()
     .uniqBy((grant) => `${grant.uuid}-${grant.address}`)

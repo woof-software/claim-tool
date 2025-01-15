@@ -22,12 +22,13 @@ export type Grant = {
   claimed: number;
   grantAmount: number;
   chainId: number;
-  proof: Claim & { claimed: boolean };
+  proof?: Claim & { claimed: boolean };
   campaign: HedgeyCampaign;
   currentUserCanClaim: boolean;
   claimEvents?: ClaimHistoryEvent[];
   tokenReleasedInDays: number | null;
   projectImage?: string;
+  address: string;
 };
 
 type GrantsContextType = {
