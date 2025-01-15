@@ -22,7 +22,7 @@ const GrantsList = ({
   return (
     <div className="flex flex-col gap-4">
       {grants.map((grant) => (
-        <GrantCard key={grant.id} grant={grant} />
+        <GrantCard key={`${grant.id}-${grant.address}`} grant={grant} />
       ))}
     </div>
   );
