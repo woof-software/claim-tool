@@ -280,14 +280,20 @@ const fetchCampaigns = async (campaignIds: string[]) => {
     }));
 };
 
-const getProofs = async (address: string, campaigns: HedgeyCampaign[]) => {
+const getProofs = async (
+  grants: {
+    id: string;
+    address: string;
+    chainId: number;
+  }[],
+) => {
   return Promise.all(
-    campaigns.map(async (campaign) => {
-      if (!campaign.id) {
+    grants.map(async (grant) => {
+      if (!grant.id) {
         return null;
       }
       const response = await fetch(
-        `/api/claims?uuid=${campaign.id}&address=${address}`,
+        `/api/claims?uuid=${grant.id}&address=${grant.address}`,
       );
       const claim = await response.json().then((data) => data.data as Claim);
 
@@ -298,13 +304,13 @@ const getProofs = async (address: string, campaigns: HedgeyCampaign[]) => {
       let claimed = false;
       if (claim.canClaim) {
         // Verify if it was already claimed from the contract
-        const publicClient = getPublicClientForChain(campaign.chainId);
-        const parsedClaimId = toHex(uuidParse(campaign.id));
+        const publicClient = getPublicClientForChain(grant.chainId);
+        const parsedClaimId = toHex(uuidParse(grant.id));
         claimed = await publicClient.readContract({
-          address: hedgeyContractAddresses[campaign.chainId],
+          address: hedgeyContractAddresses[grant.chainId],
           abi: ClaimCampaignsAbi,
           functionName: 'claimed',
-          args: [parsedClaimId, address as `0x${string}`],
+          args: [parsedClaimId, grant.address as `0x${string}`],
         });
       }
 
@@ -329,10 +335,19 @@ export const useGetGrants = () => {
         (grant) => grant.address.toLowerCase() === address?.toLowerCase(),
       );
       const proofs = await getProofs(
-        address,
-        hedgeyCampaigns.filter((campaign) =>
-          grantsForCurrentAddress.some((grant) => grant.uuid === campaign.id),
-        ),
+        grants.data
+          .map((grant) => {
+            const campaign = hedgeyCampaigns.find(
+              (campaign) => campaign.id === grant.uuid,
+            );
+            if (!campaign) return null;
+            return {
+              id: grant.uuid,
+              address: grant.address,
+              chainId: getChainIdByNetworkName(campaign.network),
+            };
+          })
+          .filter((x) => !!x),
       );
 
       const claimHistory = await getClaimHistory(
@@ -357,20 +372,13 @@ export const useGetGrants = () => {
 
           const grantAmount = Number(
             formatUnits(
-              BigInt(campaign.totalAmount || 0),
-              campaign.token?.decimals || 0,
-            ),
-          );
-
-          const claimed = Number(
-            formatUnits(
-              BigInt(Number(campaign.totalAmountClaimed) || 0),
+              BigInt(proof?.amount || 0),
               campaign.token?.decimals || 0,
             ),
           );
 
           const currentUserCanClaim = proof
-            ? proof.canClaim && !proof.claimed
+            ? proof.address === address && proof.canClaim && !proof.claimed
             : false;
           const date = new Date(campaign.createdAt as string);
           const chainId = getChainIdByNetworkName(campaign.network);
@@ -399,7 +407,6 @@ export const useGetGrants = () => {
 
             // Calculated fields
             grantAmount,
-            claimed,
             currentUserCanClaim,
             date,
             chainId,
