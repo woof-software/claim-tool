@@ -3,6 +3,7 @@
 import { CurrencySymbol } from '@/components/common/CurrencySymbol';
 import { SpinningLoader } from '@/components/common/SpinningLoader';
 import { TransactionCard } from '@/components/common/TransactionCard';
+import { GrantHistoryItemSkeleton } from '@/components/common/skeletons/ClaimHistorySkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,14 +23,19 @@ const ClaimHistory = () => {
       <div className="flex flex-col gap-6 items-start">
         <h1 className="text-4xl font-bold">Claim History</h1>
         {!isFetched ? (
-          <div className="flex justify-center items-center w-full h-full">
-            <SpinningLoader />
-          </div>
+          <>
+            <GrantHistoryItemSkeleton />
+            <GrantHistoryItemSkeleton />
+            <GrantHistoryItemSkeleton />
+          </>
         ) : (
           grants
             ?.filter((grant) => !!grant.claimEvents?.length)
             .map((grant) => (
-              <div key={grant.id} className="flex items-start gap-14 w-full">
+              <div
+                key={grant.id}
+                className="flex items-start gap-14 w-full bg-white rounded-lg p-6"
+              >
                 <div className="space-y-6 grow">
                   <div key={grant.id}>
                     <div className="flex items-center gap-4 mb-4">

@@ -1,4 +1,4 @@
-import { http, type Chain, createPublicClient, isAddress } from 'viem';
+import { http, createPublicClient, isAddress } from 'viem';
 import {
   mainnet,
   optimism,
