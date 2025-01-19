@@ -379,7 +379,10 @@ export const useGetGrants = () => {
             (x) => !!x.delegatedTo,
           )?.delegatedTo;
 
-          const latestClaimHash = claimEvents?.[0]?.transactionHash;
+          const latestClaimHash =
+            grant.address === address
+              ? claimEvents?.[0]?.transactionHash
+              : null;
 
           const tokenReleasedInDays = getNextTokenReleaseTimestamp(
             campaign.claimLockup,
@@ -411,11 +414,11 @@ export const useGetGrants = () => {
           const chainId = getChainIdByNetworkName(grant.campaign.network);
           return supportedChainIds.includes(chainId);
         })
+        .toSorted((a, b) => (a.address === address ? -1 : 1))
         .toSorted(
           (a, b) =>
             Number(b.currentUserCanClaim) - Number(a.currentUserCanClaim),
-        )
-        .toSorted((a, b) => (a.address === address ? -1 : 1));
+        );
       return mappedGrants;
     },
   });

@@ -17,8 +17,8 @@ export const TransactionCard = ({
   token,
 }: ClaimHistoryEvent & { chainId: number; token: HedgeyCampaign['token'] }) => {
   return (
-    <Card className="shadow-none border-none">
-      <CardContent className="py-8 px-10 space-y-6">
+    <Card className="shadow-none border">
+      <CardContent className="py-4 px-4 space-y-4">
         <p className="text-sm font-semibold">{date?.toLocaleDateString()}</p>
         <div className="flex items-center space-x-4 text-xs text-gray-500">
           <p className="flex items-center gap-2">
