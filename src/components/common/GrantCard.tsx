@@ -141,8 +141,11 @@ const GrantCard = ({ grant }: { grant: Grant }) => {
           {grant.campaign.token && (
             <div className="flex items-center gap-2 font-semibold">
               <CurrencySymbol token={grant.campaign.token} />
-              <span className="text-black">{grant.claimed}</span> /
-              <span className="text-gray-500">
+              <span
+                className={
+                  grant.currentUserCanClaim ? 'text-black' : 'text-gray-500'
+                }
+              >
                 {grant.grantAmount} {grant.campaign.token.ticker}
               </span>
             </div>
