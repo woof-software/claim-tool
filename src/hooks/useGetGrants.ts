@@ -327,13 +327,10 @@ export const useGetGrants = () => {
   return useQuery({
     queryKey: ['grants', address || 'unknown'],
     queryFn: async () => {
-      const response = await fetch(`/api/grants?address=${address}`);
+      const response = await fetch('/api/grants');
       const grants: ApiResponse = await response.json();
       const campaignIds = grants.data.map((grant) => grant.uuid);
       const hedgeyCampaigns = await fetchCampaigns(campaignIds);
-      const grantsForCurrentAddress = grants.data.filter(
-        (grant) => grant.address.toLowerCase() === address?.toLowerCase(),
-      );
       const proofs = await getProofs(
         grants.data
           .map((grant) => {
