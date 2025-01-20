@@ -59,11 +59,12 @@ const GrantCard = ({ grant }: { grant: Grant }) => {
           </div>
         )}
         <CardContent className="flex flex-col md:flex-row items-start md:items-center space-between py-8 px-10 relative">
-          {grant.proof?.claimed && (
-            <Badge className="absolute top-0 right-0 -translate-x-[8px] -translate-y-1/2 cursor-default">
-              Claimed
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 absolute top-0 right-0 -translate-x-[8px] -translate-y-1/2 cursor-default">
+            {grant.campaign.ended && (
+              <Badge className="bg-red-500">Cancelled</Badge>
+            )}
+            {grant.proof?.claimed && <Badge className="">Claimed</Badge>}
+          </div>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 flex-grow">
             <ProjectImage src={grant.projectImage} />
             <div className="flex flex-col gap-2 max-w-2xl">
