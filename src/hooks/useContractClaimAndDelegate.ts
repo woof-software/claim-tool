@@ -90,7 +90,6 @@ export const useContractClaimAndDelegate = () => {
       const value = BigInt(claim.claimFee);
 
       let txHash: `0x${string}` | undefined;
-      console.log('delegateeAddress', delegatee, 'claim', claim);
       if (delegatee) {
         // Get nonce for the currrent address
         const nonce = await publicClient.readContract({

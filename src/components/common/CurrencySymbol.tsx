@@ -9,7 +9,6 @@ import POA from '../../../public/currency_symbols/poa.png';
 import ZK from '../../../public/currency_symbols/zk_sync.png';
 
 const getSrc = (currencyName?: string | null) => {
-  console.log('currencyName', currencyName);
   switch (currencyName) {
     case 'ETH':
       return { src: ETH };

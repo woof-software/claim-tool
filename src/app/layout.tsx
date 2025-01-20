@@ -5,11 +5,24 @@ import type { Metadata } from 'next';
 import ClientLayout from './client-layout';
 import { inter, sora } from './fonts';
 import './globals.css';
-import { FEATURES } from '../../config/features';
+import { FEATURES, WHITELABEL_ENV } from '../../config/features';
+
+const getIcon = () => {
+  if (WHITELABEL_ENV === 'ZK_SYNC') {
+    return '/currency_symbols/zk_sync.png';
+  }
+
+  if (WHITELABEL_ENV === 'OPTIMISM') {
+    return '/currency_symbols/op.png';
+  }
+};
 
 export const metadata: Metadata = {
   title: FEATURES.APP_NAME,
   description: 'Powered by WalletConnect',
+  icons: {
+    icon: getIcon(),
+  },
 };
 
 export default function RootLayout({
