@@ -1,4 +1,10 @@
 import type { NextRequest } from 'next/server';
+import { parse as uuidParse } from 'uuid';
+import { toHex } from 'viem';
+
+import { getPublicClientForChain } from '@/lib/getPublicClientForChain';
+import { ClaimCampaignsAbi } from '../../../../config/contracts/abis/ClaimCampaignsAbi';
+import { hedgeyContractAddresses } from '../../../../config/contracts/addresses';
 
 export type Claim = {
   uuid: string;
@@ -7,40 +13,60 @@ export type Claim = {
   proof?: `0x${string}`[];
   amount: string;
   claimFee: string;
+  claimed: boolean;
 };
 
 export type ResponseData = {
   data: Claim;
 };
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const address = searchParams.get('address');
-  const uuid = searchParams.get('uuid');
-
-  if (!address) {
-    return Response.json({ error: 'address is required' }, { status: 400 });
-  }
-
-  if (!uuid) {
-    return Response.json({ error: 'uuid is required' }, { status: 400 });
-  }
-
-  const [claim, claimInfo] = await Promise.all([
-    fetch(
-      `https://api.hedgey.finance/token-claims/proof/${uuid}/${address}`,
-    ).then((res) => res.json()),
-    fetch(`https://api.hedgey.finance/token-claims/info/${uuid}`).then((res) =>
-      res.json(),
-    ),
-  ]);
-
-  const result = {
-    ...claim,
-    claimFee: claimInfo.claimFee,
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { grants } = body as {
+    grants: { id: string; address: string; chainId: number }[];
   };
 
-  return new Response(JSON.stringify({ data: result }), {
+  if (!grants?.length) {
+    return Response.json({ error: 'grants are required' }, { status: 400 });
+  }
+
+  const results = await Promise.all(
+    grants.map(async (grant) => {
+      const [claim, claimInfo] = await Promise.all([
+        fetch(
+          `https://api.hedgey.finance/token-claims/proof/${grant.id}/${grant.address}`,
+        ).then((res) => res.json()),
+        fetch(`https://api.hedgey.finance/token-claims/info/${grant.id}`).then(
+          (res) => res.json(),
+        ),
+      ]);
+
+      if (!claim) return null;
+
+      let claimed = false;
+      if (claim.canClaim) {
+        // Verify if it was already claimed from the contract
+        const publicClient = getPublicClientForChain(grant.chainId);
+        const parsedClaimId = toHex(uuidParse(grant.id));
+        claimed = await publicClient.readContract({
+          address: hedgeyContractAddresses[grant.chainId],
+          abi: ClaimCampaignsAbi,
+          functionName: 'claimed',
+          args: [parsedClaimId, grant.address as `0x${string}`],
+        });
+      }
+
+      const result: Claim = {
+        ...claim,
+        claimFee: claimInfo.claimFee,
+        claimed,
+      };
+
+      return result;
+    }),
+  );
+
+  return new Response(JSON.stringify({ data: results.filter((x) => !!x) }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });

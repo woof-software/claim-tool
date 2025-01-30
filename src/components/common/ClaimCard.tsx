@@ -1,12 +1,14 @@
 import type { Grant } from '@/context/GrantsContext';
 import useContractClaimAndDelegate from '@/hooks/useContractClaimAndDelegate';
-import { useGetClaim } from '@/hooks/useGetClaim';
 import { useToast } from '@/hooks/useToast';
-import { generateBlockExplorerUrl } from '@/lib/getPublicClientForChain';
+import {
+  generateBlockExplorerUrl,
+  getChainForChainId,
+} from '@/lib/getPublicClientForChain';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   ContractFunctionExecutionError,
@@ -27,6 +29,7 @@ import { Input } from '../ui/input';
 import SuccessCheckmark from './images/SuccessCheckmark';
 
 import { Loader2 } from 'lucide-react';
+import { useChainId } from 'wagmi';
 import { FEATURES } from '../../../config/features';
 
 const { DELEGATION_REQUIRED, DELEGATES_URL, CONFIRMATION_CHECKMARK_BG_COLOR } =
@@ -52,9 +55,9 @@ const FormSchema = z
 
 export default function ClaimCard({ grant }: { grant: Grant }) {
   const { toast } = useToast();
-  const { claim } = useGetClaim({
-    uuid: grant.id,
-  });
+  const chainId = useChainId();
+  const isCorrectChain = chainId === grant.chainId;
+
   const { mutateAsync: claimAndDelegate, isPending } =
     useContractClaimAndDelegate();
 
@@ -73,7 +76,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!claim) {
+    if (!grant.proof) {
       toast({
         title: 'Error',
         description: 'Claim not found',
@@ -99,7 +102,7 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
         delegateeAddress: data.isDelegationRequired
           ? (data.delegateAddress as `0x${string}`)
           : undefined,
-        claim,
+        claim: grant.proof,
         tokenAddress: grant.campaign.token.address as `0x${string}`,
         tokenName: grant.campaign.token.name,
       });
@@ -131,6 +134,29 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
   }
 
   const isDelegationRequired = form.watch('isDelegationRequired');
+
+  const buttonContent = useMemo(() => {
+    if (isPending) {
+      return (
+        <>
+          <div className="flex pr-2 justify-center items-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+          Claiming...
+        </>
+      );
+    }
+
+    if (!isCorrectChain) {
+      const correctChain = getChainForChainId(grant.chainId);
+      return `Switch to ${correctChain.name} to claim`;
+    }
+
+    if (isDelegationRequired) {
+      return 'Delegate and claim';
+    }
+    return 'Claim';
+  }, [isPending, isCorrectChain, grant.chainId, isDelegationRequired]);
 
   return (
     <Card className="bg-transparent border border-neutral-300 shadow-none py-10 px-4">
@@ -188,18 +214,11 @@ export default function ClaimCard({ grant }: { grant: Grant }) {
               <Button
                 type="submit"
                 className="bg-primaryActionButtonBg hover:bg-initial"
-                disabled={!form.formState.isValid || isPending}
+                disabled={
+                  !form.formState.isValid || isPending || !isCorrectChain
+                }
               >
-                {!isPending &&
-                  (isDelegationRequired ? 'Delegate and claim' : 'Claim')}
-                {isPending && (
-                  <>
-                    <div className="flex pr-2 justify-center items-center py-8">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    </div>
-                    Claiming...
-                  </>
-                )}
+                {buttonContent}
               </Button>
             </CardFooter>
           </form>

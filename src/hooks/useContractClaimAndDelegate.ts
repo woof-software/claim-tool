@@ -51,6 +51,7 @@ export const useContractClaimAndDelegate = () => {
   const { data: walletClient } = useWalletClient();
 
   return useMutation({
+    throwOnError: true,
     mutationKey: ['contract-claim-and-delegate'],
     mutationFn: async ({
       delegateeAddress: delegatee,

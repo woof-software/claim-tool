@@ -9,12 +9,9 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { type ResultOf, graphql } from 'gql.tada';
 import { print } from 'graphql';
-import { parse as uuidParse } from 'uuid';
 import { formatUnits, parseEventLogs, toHex } from 'viem';
 import { useAccount } from 'wagmi';
-import { ClaimCampaignsAbi } from '../../config/contracts/abis/ClaimCampaignsAbi';
 import { TokenAbi } from '../../config/contracts/abis/TokenAbi';
-import { hedgeyContractAddresses } from '../../config/contracts/addresses';
 import { hedgeyGraphqlApiEndpoint } from '../../config/contracts/endpoints';
 import { FEATURES, getChainConfig } from '../../config/features';
 
@@ -287,39 +284,22 @@ const getProofs = async (
     chainId: number;
   }[],
 ) => {
-  return Promise.all(
-    grants.map(async (grant) => {
-      if (!grant.id) {
-        return null;
-      }
-      const response = await fetch(
-        `/api/claims?uuid=${grant.id}&address=${grant.address}`,
-      );
-      const claim = await response.json().then((data) => data.data as Claim);
-
-      if (!claim) {
-        return null;
-      }
-
-      let claimed = false;
-      if (claim.canClaim) {
-        // Verify if it was already claimed from the contract
-        const publicClient = getPublicClientForChain(grant.chainId);
-        const parsedClaimId = toHex(uuidParse(grant.id));
-        claimed = await publicClient.readContract({
-          address: hedgeyContractAddresses[grant.chainId],
-          abi: ClaimCampaignsAbi,
-          functionName: 'claimed',
-          args: [parsedClaimId, grant.address as `0x${string}`],
-        });
-      }
-
-      return {
-        ...claim,
-        claimed,
-      };
+  if (!grants.length) return [];
+  const response = await fetch('/api/claims', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      grants: grants.map((grant) => ({
+        id: grant.id,
+        address: grant.address,
+        chainId: grant.chainId,
+      })),
     }),
-  );
+  });
+  const claims = await response.json().then((data) => data.data as Claim[]);
+  return claims;
 };
 
 export const useGetGrants = () => {
@@ -327,34 +307,42 @@ export const useGetGrants = () => {
   return useQuery({
     queryKey: ['grants', address || 'unknown'],
     queryFn: async () => {
+      // Fetch grants from google sheet
       const response = await fetch('/api/grants');
       const grants: ApiResponse = await response.json();
       const campaignIds = grants.data.map((grant) => grant.uuid);
+
+      // Fetch hedgey campaigns from their graphql api
       const hedgeyCampaigns = await fetchCampaigns(campaignIds);
-      const proofs = await getProofs(
-        grants.data
-          .map((grant) => {
-            const campaign = hedgeyCampaigns.find(
-              (campaign) => campaign.id === grant.uuid,
-            );
-            if (!campaign) return null;
-            return {
-              id: grant.uuid,
-              address: grant.address,
-              chainId: getChainIdByNetworkName(campaign.network),
-            };
-          })
-          .filter((x) => !!x),
-      );
 
-      const claimHistory = await getClaimHistory(
-        address,
-        hedgeyCampaigns.map((campaign) => ({
-          grantId: campaign.id as string,
-          chainId: campaign.chainId,
-        })),
-      );
+      const [proofs, claimHistory] = await Promise.all([
+        // Fetch proofs from their rest api
+        getProofs(
+          grants.data
+            .map((grant) => {
+              const campaign = hedgeyCampaigns.find(
+                (campaign) => campaign.id === grant.uuid,
+              );
+              if (!campaign) return null;
+              return {
+                id: grant.uuid,
+                address: grant.address,
+                chainId: getChainIdByNetworkName(campaign.network),
+              };
+            })
+            .filter((x) => !!x),
+        ),
+        // Fetch claim history from their graphql api
+        getClaimHistory(
+          address,
+          hedgeyCampaigns.map((campaign) => ({
+            grantId: campaign.id as string,
+            chainId: campaign.chainId,
+          })),
+        ),
+      ]);
 
+      // Combine the data
       const mappedGrants = grants.data
         .map((grant) => {
           const campaign = hedgeyCampaigns?.find(
