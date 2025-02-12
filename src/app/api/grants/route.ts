@@ -122,6 +122,7 @@ export async function GET(req: NextRequest) {
       },
     );
   }
+
   const [header, ...rows] = result.values as string[][];
   const grants = _.chain(rows)
     .map((row) =>
