@@ -80,6 +80,8 @@ export async function GET(req: NextRequest) {
   );
   const sheetNames = await sheetNamesResponse.json();
   if (!sheetNamesResponse.ok) {
+    console.error('Error fetching sheet name');
+    console.error(sheetNames);
     return Response.json(
       {
         success: false,
@@ -112,6 +114,8 @@ export async function GET(req: NextRequest) {
   );
   const result = await response.json();
   if (!response.ok) {
+    console.error('Error fetching sheet values');
+    console.error(result);
     return Response.json(
       {
         success: false,
