@@ -45,46 +45,84 @@ export async function GET(req: NextRequest) {
   const sheetId = process.env.GOOGLE_SHEETS_ID;
 
   if (!apiKey) {
-    return Response.json({
-      success: false,
-      message: 'API key is not set',
-    });
+    return Response.json(
+      {
+        success: false,
+        message: 'API key is not set',
+      },
+      {
+        status: 500,
+      },
+    );
   }
   if (!sheetId) {
-    return Response.json({
-      success: false,
-      message: 'Sheet ID is not set',
-    });
+    return Response.json(
+      {
+        success: false,
+        message: 'Sheet ID is not set',
+      },
+      {
+        status: 500,
+      },
+    );
   }
+
+  const headers = {
+    'X-goog-api-key': apiKey,
+  };
 
   // Fetch sheet names
   const sheetNamesResponse = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?&fields=sheets.properties`,
     {
-      headers: {
-        'X-goog-api-key': apiKey,
-      },
+      headers,
     },
   );
   const sheetNames = await sheetNamesResponse.json();
+  if (!sheetNamesResponse.ok) {
+    return Response.json(
+      {
+        success: false,
+        message: sheetNames.error.message || 'Failed to fetch sheet names',
+      },
+      {
+        status: sheetNamesResponse.status || 500,
+      },
+    );
+  }
   const title: string = sheetNames?.sheets[0]?.properties?.title;
 
   if (!title) {
-    return Response.json({
-      success: false,
-      message: 'Sheet title is not set',
-    });
+    return Response.json(
+      {
+        success: false,
+        message: 'Sheet title is not set',
+      },
+      {
+        status: 500,
+      },
+    );
   }
 
   const response = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${title}`,
     {
-      headers: {
-        'X-goog-api-key': apiKey,
-      },
+      headers,
     },
   );
   const result = await response.json();
+  if (!response.ok) {
+    return Response.json(
+      {
+        success: false,
+        message: result.error.message || 'Failed to fetch sheet values',
+      },
+      {
+        status: response.status || 500,
+      },
+    );
+  }
+
   const [header, ...rows] = result.values as string[][];
   const grants = _.chain(rows)
     .map((row) =>
@@ -112,9 +150,14 @@ export async function GET(req: NextRequest) {
     .uniqBy((grant) => `${grant.uuid}-${grant.address}`)
     .value();
 
-  return Response.json({
-    data: grants,
-    success: true,
-    message: 'Grants fetched successfully',
-  });
+  return Response.json(
+    {
+      data: grants,
+      success: true,
+      message: 'Grants fetched successfully',
+    },
+    {
+      status: 200,
+    },
+  );
 }
